@@ -2,19 +2,23 @@
 
 struct Component
     x::Float64
+    Cx::Float64
     y::Float64
+    Cy::Float64
     z::Float64
+    Cz::Float64
 end
 
-Component(x::Number,y::Number) = Component(x,y,NaN)
+Component(x::Number, Cx::Number) = Component(x, Cx, NaN, NaN, NaN, NaN)
+Component(x::Number, Cx::Number, y::Number, Cy::Number) = Component(x, Cx, y, Cy, NaN, NaN)
 
 function countcomponents(c::Component)
     f = fieldnames(Component)
     n = 0
-
     @inbounds for i in f
         n += ifelse(isnan(getfield(c,i)),0,1)
     end
+    iseven(n) || @warn "Non-even non-NaN components. Inspect input."
     n
 end
 
@@ -23,63 +27,73 @@ abstract type System end
 
 struct System2 <: System
     A::Component
-    cA::Component
     B::Component
-    cB::Component
 end
 
 struct System3 <: System
     A::Component
-    cA::Component
     B::Component
-    cB::Component
     C::Component
-    cC::Component
 end
 
-System(A::T, B::T; cA::T=T(1,1),cB::T=T(1,1)) where T <: Component= System2(A,cA,B,cB)
-System(A::T, B::T, C::T; cA::T=T(1,1),cB::T=T(1,1), cC::T = T(1,1)) where T <: Component = System3(A,cA,B,cB,C,cC)
+System(A::T, B::T) where T <: Component= System2(A,B)
+System(A::T, B::T, C::T) where T <: Component = System3(A,B,C)
 
 
-abstract type Prior end 
+abstract type Datum end 
 
-struct Norm <: Prior
+struct Norm <: Datum
     mu::Float64
     sig::Float64
 end
 
-struct logNorm <: Prior
+struct logNorm <: Datum
     mu::Float64
     sig::Float64
 end
 
-struct Unf <: Prior
+struct Unf <: Datum
     a::Float64
     b::Float64
 end
 
-struct Constant <: Prior
+struct Constant <: Datum
     x::Float64
 end
 
 abstract type Data end
 
 struct Data2 <: Data
-    x::Prior
-    cx::Prior
-    y::Prior
-    cy::Prior
+    x::Datum
+    Cx::Datum
+    y::Datum
+    Cy::Datum
 end
 
 struct Data3 <: Data
-    x::Prior
-    cx::Prior
-    y::Prior
-    cy::Prior
-    z::Prior
-    cz::Prior
+    x::Datum
+    Cx::Datum
+    y::Datum
+    Cy::Datum
+    z::Datum
+    Cz::Datum
 end
 
+abstract type Prior end
+
+struct Prior2{T} <:Prior where T <: Data
+    A::T
+    B::T
+end
+
+struct Prior3{T} <:Prior where T <: Data
+    A::T
+    B::T
+    C::T
+end
+
+Prior(A::Data, B::Data) = Prior2(A,B)
+Prior(A::Data, B::Data, C::Data) = Prior3(A,B,C)
 
 abstract type Fraction end 
 
@@ -127,7 +141,7 @@ function Fraction(A::Tuple{Number,Number}, B::Tuple{Number,Number}; n::Int=100)
         fB = repeat(range(float(B[1]), float(B[2]), n), 1, n)'
         fC = @. 1 - fA + fB
 
-        Fraction3(fA,fB,fC,n)
+        Fraction3(fA,fB,fC,n*n)
 end
 
 abstract type Model end
@@ -147,22 +161,23 @@ function Model(f::Fraction, s::T) where T<: System
     n = f.n
     c = countcomponents(s.A)
 
-    @assert c == countcomponents(s.cA) ==
-    countcomponents(s.B) ==  countcomponents(s.cB)
+    if T <: System2 
+        @assert c == countcomponents(s.B)
+    elseif T<: System3
+        @assert c == countcomponents(s.B) == countcomponents(s.C)
+    end
 
-    T <: System3 && @assert c == countcomponents(s.C) ==  countcomponents(s.cC)
-
-    if c==2
+    if c==4
         Model2(
             Vector{Float64}(undef,n),
             Vector{Float64}(undef,n),)
-    elseif c==3
+    elseif c==6
         Model3(
             Vector{Float64}(undef,n),
             Vector{Float64}(undef,n),
             Vector{Float64}(undef,n),)
     else
-        @error "IsoMix does not support $c components"
+        @error "IsoMix does not support $(c/2) components"
     end
 end
 

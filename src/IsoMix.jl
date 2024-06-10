@@ -8,7 +8,7 @@ export Model, Model2, Model3
 include("containers.jl")
 
 
-export mix, mix!, 
+export mix, mix!
 include("mix.jl")
 
 end
