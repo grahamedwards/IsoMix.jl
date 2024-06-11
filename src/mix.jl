@@ -7,6 +7,17 @@ function mix(s::System, f::Fraction)
     m
 end
 
+function mix!(s::System2, f::Fraction2, m::Model1)
+    @inbounds @simd ivdep for i = 1:f.n
+        fA, fB = f.A[i], f.B[i]
+        Amass, Bmass = (fA * s.A.Cx, fB * s.B.Cx)
+        mixturemass =  Amass + Bmass
+        m.x[i] =   (Amass * s.A.x + Bmass * s.B.x ) / mixturemass
+        m.Cx[i] = mixturemass
+    end
+    m
+end
+
 function mix!(s::System2, f::Fraction2, m::Model2)
     @inbounds @simd ivdep for i = 1:f.n
         fA, fB = f.A[i], f.B[i]

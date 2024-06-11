@@ -63,6 +63,11 @@ end
 
 abstract type Data end
 
+struct Data1 <: Data
+    x::Datum
+    Cx::Datum
+end
+
 struct Data2 <: Data
     x::Datum
     Cx::Datum
@@ -146,6 +151,11 @@ end
 
 abstract type Model end
 
+struct Model1 <: Model
+    x::Vector{Float64}
+    cX::Vector{Float64}
+end
+
 struct Model2 <: Model
     x::Vector{Float64}
     y::Vector{Float64}
@@ -167,7 +177,11 @@ function Model(f::Fraction, s::T) where T<: System
         @assert c == countcomponents(s.B) == countcomponents(s.C)
     end
 
-    if c==4
+    if c==2
+        Model1(
+            Vector{Float64}(undef,n),
+            Vector{Float64}(undef,n),)
+    elseif c==4
         Model2(
             Vector{Float64}(undef,n),
             Vector{Float64}(undef,n),)
