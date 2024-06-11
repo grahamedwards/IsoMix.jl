@@ -1,6 +1,7 @@
 
+abstract type IsoMixType end
 
-struct Component
+struct Component <: IsoMixType
     x::Float64
     Cx::Float64
     y::Float64
@@ -23,7 +24,7 @@ function countcomponents(c::Component)
 end
 
 
-abstract type System end
+abstract type System <: IsoMixType end
 
 struct System2 <: System
     A::Component
@@ -40,7 +41,7 @@ System(A::T, B::T) where T <: Component= System2(A,B)
 System(A::T, B::T, C::T) where T <: Component = System3(A,B,C)
 
 
-abstract type Datum end 
+abstract type Datum <: IsoMixType end 
 
 struct Norm <: Datum
     mu::Float64
@@ -84,7 +85,7 @@ struct Data3 <: Data
     Cz::Datum
 end
 
-abstract type Prior end
+abstract type Prior <: IsoMixType end
 
 struct Prior2{T} <:Prior where T <: Data
     A::T
@@ -100,7 +101,7 @@ end
 Prior(A::Data, B::Data) = Prior2(A,B)
 Prior(A::Data, B::Data, C::Data) = Prior3(A,B,C)
 
-abstract type Fraction end 
+abstract type Fraction <: IsoMixType end 
 
 struct Fraction2 <: Fraction
     A::Vector{Float64}
@@ -149,7 +150,7 @@ function Fraction(A::Tuple{Number,Number}, B::Tuple{Number,Number}; n::Int=100)
         Fraction3(fA,fB,fC,n*n)
 end
 
-abstract type Model end
+abstract type Model <: IsoMixType end
 
 struct Model1 <: Model
     x::Vector{Float64}
