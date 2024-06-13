@@ -7,6 +7,12 @@ IsoMixType
 
 ├─ [`Component`](@ref)
 
+│  ├─ Component1
+
+│  ├─ Component2
+
+│  └─ Component3
+
 ├─ [`Data`](@ref)
 
 │  ├─ Data1
@@ -258,9 +264,9 @@ abstract type Datum <: IsoMixType end
 
 """
 
-    Norm(μ, σ) <: Datum
+    Norm(m, s) <: Datum
 
-Normally distributed [`Datum`](@ref) with mean `μ` and standard deviation `σ`.
+Normally distributed [`Datum`](@ref) with mean `m` and standard deviation `s`.
 
 """
 struct Norm <: Datum
@@ -270,14 +276,14 @@ end
 
 """
 
-    logNorm(μ, σ) <: Datum
+    logNorm(lm, ls) <: Datum
 
-Log-normally distributed [`Datum`](@ref) with log-mean `μ` and log-space standard deviation `σ`.
+Log-normally distributed [`Datum`](@ref) with log-mean `lm` and log-space standard deviation `ls`.
 
 """
 struct logNorm <: Datum
-    m::Float64
-    s::Float64
+    lm::Float64
+    ls::Float64
 end
 
 """
@@ -316,6 +322,26 @@ see also: [`Data1`](@ref), [`Data2`](@ref), [`Data3`](@ref)
 """
 abstract type Data <: IsoMixType end
 
+Data(x::Datum, Cx::Datum) = Data1(x, Cx)
+
+Data(x::Datum, Cx::Datum, y::Datum, Cy::Datum) = Data2(x, Cx, y, Cy)
+
+Data(x::Datum, Cx::Datum, y::Datum, Cy::Datum, z::Datum, Cz::Datum) = Data3(x, Cx, y, Cy, z, Cz)
+
+function Data(;x::Datum=Constant(NaN), Cx::Datum=Constant(NaN), y::Datum=Constant(NaN), Cy::Datum=Constant(NaN), z::Datum=Constant(NaN), Cz::Datum=Constant(NaN)) 
+    
+    @assert Constant(NaN) ∉ (x,Cx) "Insufficient components declared."
+    @assert iseven(count(x -> x==Constant(NaN),(x,y,z,Cx,Cy,Cz))) "All components must have paired isotope composition and concentration data."
+
+    out = if z == Cz == y == Cy == Constant(NaN)
+        Data1(x,Cx)
+    elseif z == Cz == Constant(NaN)
+        Data2(x, Cx, y, Cy)
+    else
+        Data3(x, Cx, y, Cy, z, Cz)
+    end
+    out
+end
 """
 
     Data1 <: Data 
@@ -330,7 +356,7 @@ abstract type Data <: IsoMixType end
 see also: [`Datum`](@ref)
 
 """
-@kwdef struct Data1 <: Data
+struct Data1 <: Data
     x::Datum
     Cx::Datum
 end
@@ -604,7 +630,7 @@ Model(f::Fraction,::System{Component3}) = Model3(Vector{Float64}(undef,f.n), Vec
 
     Model1 <: Model
 
-1-dimensional `Model` instance.
+1-dimensional `Model` instance: a single species tracking isotopic composition and concentration.
 
 |Fields ||
 |:--|:--|
@@ -616,21 +642,19 @@ see also: [`Model`](@ref)
 """
 struct Model1 <: Model
     x::Vector{Float64}
-    cX::Vector{Float64}
+    Cx::Vector{Float64}
 end
 
 """
 
     Model2 <: Model
 
-2-dimensional `Model` instance.
+2-dimensional `Model` instance: two species tracking isotopic composition.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
 
 see also: [`Model`](@ref)
 
@@ -644,16 +668,13 @@ end
 
     Model3 <: Model
 
-3-dimensional `Model` instance.
+3-dimensional `Model` instance: three species tracking isotopic composition.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
 `z` | Isotopic composition of z
-`Cz`| Concentration of z
 
 see also: [`Model`](@ref)
 
