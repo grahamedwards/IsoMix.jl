@@ -72,23 +72,23 @@ testfraction = Fraction(2,n=3)
 @test typeof(testfraction) <: Fraction2
 
 testfracbool = 1
-testfracbool *= prod(testfraction.A .≈ [0.0, 0.5, 1.0])
-testfracbool *= prod(testfraction.B .≈ [1.0, 0.5, 0.0])
+testfracbool *= isapprox(testfraction.A, [0.0, 0.5, 1.0])
+testfracbool *= isapprox(testfraction.B, [1.0, 0.5, 0.0])
 @test testfracbool * testfraction.n == 3
 @test μ(testfraction.A .+ testfraction.B) ≈ 1.0
 
 testfraction = Fraction(3, n=3)
 @test typeof(testfraction) <: Fraction3
 
-testfracbool *= prod(testfraction.A .≈ [0.0, 0.0, 0.0, 0.5, 0.5, 1.0])
-testfracbool *= prod(testfraction.B .≈ [0.0, 0.5, 1.0, 0.0, 0.5, 0.0])
-testfracbool *= prod(testfraction.C .≈ [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
+testfracbool *= isapprox(testfraction.A, [0.0, 0.0, 0.0, 0.5, 0.5, 1.0])
+testfracbool *= isapprox(testfraction.B, [0.0, 0.5, 1.0, 0.0, 0.5, 0.0])
+testfracbool *= isapprox(testfraction.C, [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
 @test testfracbool * testfraction.n == 6
 @test μ(@. testfraction.A + testfraction.B + testfraction.C) ≈ 1.0
 
-@test prod(Fraction(.2,.6,n=3).B .≈ (0.8, 0.6, 0.4)) 
+@test isapprox(Fraction(.2,.6,n=3).B, [0.8, 0.6, 0.4]) 
 
-@test prod(Fraction(.2,.6,.3,.7,n=3).B .≈ (0.3, 0.5, 0.7, 0.3, 0.5, 0.3)) 
+@test isapprox(Fraction(.2,.6,.3,.7,n=3).B, [0.3, 0.5, 0.7, 0.3, 0.5, 0.3]) 
 
 # Model
 
