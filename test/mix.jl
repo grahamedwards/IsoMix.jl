@@ -1,4 +1,4 @@
-# 2-component, 1 species
+# 2-endmember, 1 species
 mtf, mts = Fraction(2,n=6), System(Component(-3,2), Component(3,4))
 mtm = mix(mts,mtf)
 
@@ -8,7 +8,7 @@ mtm = mix(mts,mtf)
 
 
 
-# 2-component, 2 species
+# 2-endmember, 2 species
 mtf, mts = Fraction(2,n=6), System(Component(-3,2,-3,4), Component(3,4,3,2))
 mtm = Model(mtf, mts)
 mix!(mtm,mts,mtf)
@@ -18,7 +18,7 @@ mix!(mtm,mts,mtf)
 
 
 
-# 2-component, 3 species
+# 2-endmember, 3 species
 mtf, mts = Fraction(2,n=6), System(Component(-3,2,-3,4,-6,1), Component(3,4,3,2,6,2))
 mtm = mix(mts,mtf)
 
@@ -28,7 +28,7 @@ mtm = mix(mts,mtf)
 
 
 
-# 3-component, 2 species
+# 3-endmember, 2 species
 mtf, mts = Fraction(3,n=5), System(Component(-3,2,-3,4), Component(3,4,3,2), Component(6,1,-6,1))
 mtm = mix(mts,mtf)
 
@@ -36,7 +36,7 @@ mtm = mix(mts,mtf)
 @test mtm.y ≈ [-6.0, -2.4, 0.0, 1.7142857142857142, 3.0, -4.285714285714286, -2.25, -0.6666666666666666, 0.6, -3.6, -2.1818181818181817, -1.0, -3.230769230769231, -2.142857142857143, -3.0]
 
 
-# 3-component, 3 species
+# 3-endmember, 3 species
 mtf, mts = Fraction(3,n=5), System(Component(-3,2,-3,4,-6,1), Component(3,4,3,2,6,2), Component(6,1,-6,1, -2, 4))
 mtm = mix(mts,mtf)
 

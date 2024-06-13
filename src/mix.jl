@@ -1,5 +1,30 @@
 """
     mix(s<:System, f<:Fraction)
+
+Calculate mixing between components of system `s` given fractional mixtures `f`, returned in a `Model` instance.
+
+see also: [`mix`](@ref), [`System`](@ref), [`Fraction`](@ref), [`Model`](@ref)
+
+---
+
+### Input configurations:
+
+    mix(s::System2{Component1}, f::Fraction2) -> Model1
+Two-endmember, 1 species.
+
+    mix(s::System2{Component2}, f::Fraction2) -> Model2
+Two-endmember, 2 species.
+
+    mix(s::System2{Component3}, f::Fraction2) -> Model3
+Two-endmember, 3 species.
+
+    mix(s::System3{Component2}, f::Fraction3) -> Model2
+Three-endmember, 2 species.
+
+    mix(s::System3{Component3}, f::Fraction3) -> Model3
+Three-endmember, 3 species.
+
+
 """
 function mix(s::System, f::Fraction)
     m = Model(f,s)
@@ -8,11 +33,14 @@ function mix(s::System, f::Fraction)
 end
 
 
+
 """
 
     mix!(m <: Model, s <: System, f <: Fraction)
 
 In-place version of [`mix`](@ref) that overwrites fields in `m`.
+
+see also: [`System`](@ref), [`Fraction`](@ref), [`Model`](@ref)
 
 """
 function mix!(m::Model1, s::System2, f::Fraction2)
