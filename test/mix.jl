@@ -50,3 +50,10 @@ mtm = mix(mts,mtf)
 @test mtm.cx ≈ [1.0, 1.75, 2.5, 3.25, 4.0, 1.25, 2.0, 2.75, 3.5, 1.5, 2.25, 3.0, 1.75, 2.5, 2.0]
 @test mtm.cy ≈ [1.0, 1.25, 1.5, 1.75, 2.0, 1.75, 2.0, 2.25, 2.5, 2.5, 2.75, 3.0, 3.25, 3.5, 4.0]
 @test mtm.cz ≈ [4.0, 3.5, 3.0, 2.5, 2.0, 3.25, 2.75, 2.25, 1.75, 2.5, 2.0, 1.5, 1.75, 1.25, 1.0]
+
+
+## Fraction calculators 
+
+@test [fractions(System(Component(-3,2,), Component(3,4)), 7/3)...] ≈ [0.2,0.8]
+
+@test isapprox([fractions(System(Component(-3,2,-3,4), Component(3,4,3,2), Component(6,1,-6,1)), 3.6, 0.0)...], [0,.5,.5], atol = 1e-10)

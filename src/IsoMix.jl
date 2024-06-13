@@ -1,4 +1,5 @@
 module IsoMix
+import StaticArrays
 
 export IsoMixType
 export Component, Component1, Component2, Component3
@@ -9,7 +10,7 @@ export Model, Model1, Model2, Model3
 include("containers.jl")
 
 
-export mix, mix!
+export mix, mix!, fractions
 include("mix.jl")
 
 end

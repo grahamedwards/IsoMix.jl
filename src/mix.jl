@@ -121,3 +121,28 @@ function mix!(m::Model3, s::System3, f::Fraction3)
     end
     m
 end
+
+
+
+"""
+
+    fractions(s<:System2{Component1}, x)
+
+Calculate the fractional contributions of each the two `Component`s in `s`, given a composition of `x`.
+
+---
+
+    fractions(s<:System3{Component2}, x, y)
+
+Calculate the fractional contributions of each the three `Component`s in `s`, given compositions of `x` and `y`.
+
+"""
+function fractions(s::System2{Component1}, x::Float64) 
+    out = StaticArrays.SA[(s.A.x-x)*s.A.cx (s.B.x-x)*s.B.cx; 1 1] \ StaticArrays.SA[0,1]
+    (out.x,out.y)
+end
+
+function fractions(s::System3{Component2}, x::T, y::T) where T<: Float64
+    out = StaticArrays.SA[(s.A.x-x)*s.A.cx (s.B.x-x)*s.B.cx (s.C.x-x)*s.C.cx ; (s.A.y-y)*s.A.cx (s.B.y-y)*s.B.cy (s.C.y-y)*s.C.cy ; 1 1 1] \ StaticArrays.SA[0 , 0 , 1]
+    (out.x,out.y,out.z)
+end
