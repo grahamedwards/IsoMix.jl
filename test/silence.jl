@@ -5,7 +5,10 @@ Execute `expr` without printing any messages or warnings. If an error is encount
 
 # Examples
 
-    julia> @silence sin(π)
+    julia> d = @silence sin(π) # place any variable assignment outside the macro.
+    0.0
+
+    julia> d
     0.0
 
     julia> @silence error("oh dear...")
@@ -14,7 +17,7 @@ Execute `expr` without printing any messages or warnings. If an error is encount
     └ @ Main ~/code/IsoMix.jl/test/silence.jl:21
     ERROR: oh dear...
     ...
-
+    
 """
 macro silence(block)
     quote

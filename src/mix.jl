@@ -1,12 +1,20 @@
-
-
-
+"""
+    mix(s<:System, f<:Fraction)
+"""
 function mix(s::System, f::Fraction)
     m = Model(f,s)
     mix!(s,f,m)
     m
 end
 
+
+"""
+
+    mix!(s <: System, f <: Fraction, m <: Model)
+
+In-place version of [`mix`](@ref) that overwrites fields in `m`.
+
+"""
 function mix!(s::System2, f::Fraction2, m::Model1)
     @inbounds @simd ivdep for i = 1:f.n
         fA, fB = f.A[i], f.B[i]
