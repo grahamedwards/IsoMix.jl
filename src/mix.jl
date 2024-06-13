@@ -45,49 +45,79 @@ see also: [`System`](@ref), [`Fraction`](@ref), [`Model`](@ref)
 """
 function mix!(m::Model1, s::System2, f::Fraction2)
     @inbounds @simd ivdep for i = 1:f.n
-        fA, fB = f.A[i], f.B[i]
-        @fastmath Amass, Bmass = (fA * s.A.Cx, fB * s.B.Cx)
-        @fastmath mixturemass =  Amass + Bmass
-        @fastmath m.x[i] =   (Amass * s.A.x + Bmass * s.B.x ) / mixturemass
-        m.Cx[i] = mixturemass
+        fxA, fxB = f.A[i] * s.A.cx, f.B[i] * s.B.cx
+
+        xmix = fxA+fxB
+
+        m.x[i] = (fxA * s.A.x + fxB * s.B.x) / xmix
+        m.cx[i] = xmix
     end
     m
 end
 
 function mix!( m::Model2, s::System2, f::Fraction2)
     @inbounds @simd ivdep for i = 1:f.n
-        fA, fB = f.A[i], f.B[i]
-        @fastmath m.x[i] =   (fA * s.A.Cx * s.A.x + fB * s.B.Cx * s.B.x ) / (fA * s.A.Cx + fB * s.B.Cx)
-        @fastmath m.y[i] = (fA * s.A.Cy * s.A.y + fB * s.B.Cy * s.B.y) / (fA * s.A.Cy + fB * s.B.Cy)
+        fxA, fyA = f.A[i] .* (s.A.cx, s.A.cy)
+        fxB, fyB = f.B[i] .* (s.B.cx, s.B.cy)
+
+        xmix, ymix = fxA+fxB, fyA+fyB
+
+        m.x[i] = (fxA * s.A.x + fxB * s.B.x) / xmix
+        m.y[i] = (fyA * s.A.y + fyB * s.B.y) / ymix
+
+        m.cx[i], m.cy[i] = xmix, ymix
     end
     m
 end
 
 function mix!(m::Model3, s::System2, f::Fraction2)
     @inbounds @simd ivdep for i = 1:f.n
-        fA, fB = f.A[i], f.B[i]
-        @fastmath m.x[i] =   (fA * s.A.Cx * s.A.x + fB * s.B.Cx * s.B.x ) / (fA * s.A.Cx + fB * s.B.Cx)
-        @fastmath m.y[i] = (fA * s.A.Cy * s.A.y + fB * s.B.Cy * s.B.y) / (fA * s.A.Cy + fB * s.B.Cy)
-        @fastmath m.z[i] = (fA * s.A.Cz * s.A.z + fB * s.B.Cz * s.B.z) / (fA * s.A.Cz + fB * s.B.Cz)
+
+        fxA, fyA, fzA = f.A[i] .* (s.A.cx, s.A.cy, s.A.cz)
+        fxB, fyB, fzB = f.B[i] .* (s.B.cx, s.B.cy, s.B.cz)
+
+        xmix, ymix, zmix = fxA+fxB, fyA+fyB, fzA+fzB
+
+        m.x[i] = (fxA * s.A.x + fxB * s.B.x) / xmix
+        m.y[i] = (fyA * s.A.y + fyB * s.B.y) / ymix
+        m.z[i] = (fzA * s.A.z + fzB * s.B.z) / zmix
+
+        m.cx[i], m.cy[i], m.cz[i] = xmix, ymix, zmix
     end
     m
 end
 
 function mix!(m::Model2, s::System3, f::Fraction3)
     @inbounds @simd ivdep for i = 1:f.n
-        fA, fB, fC = f.A[i], f.B[i], f.C[i]
-        @fastmath m.x[i] = (fA * s.A.Cx * s.A.x + fB * s.B.Cx * s.B.x + fC * s.C.Cx * s.C.x) / (fA * s.A.Cx + fB * s.B.Cx + fC * s.C.Cx)
-        @fastmath m.y[i] = (fA * s.A.Cy * s.A.y + fB * s.B.Cy * s.B.y + fC * s.C.Cy * s.C.y) / (fA * s.A.Cy + fB * s.B.Cy + fC * s.C.Cy)
+
+        fxA, fyA = f.A[i] .* (s.A.cx, s.A.cy)
+        fxB, fyB = f.B[i] .* (s.B.cx, s.B.cy)
+        fxC, fyC = f.C[i] .* (s.C.cx, s.C.cy)
+
+        xmix, ymix = fxA+fxB+fxC, fyA+fyB+fyC
+
+        m.x[i] = (fxA * s.A.x + fxB * s.B.x + fxC * s.C.x) / xmix
+        m.y[i] = (fyA * s.A.y + fyB * s.B.y + fyC * s.C.y) / ymix
+
+        m.cx[i], m.cy[i] = xmix, ymix
     end
     m
 end
 
 function mix!(m::Model3, s::System3, f::Fraction3)
     @inbounds @simd ivdep for i = 1:f.n
-        fA, fB, fC = f.A[i], f.B[i], f.C[i]
-        @fastmath m.x[i] = (fA * s.A.Cx * s.A.x + fB * s.B.Cx * s.B.x + fC * s.C.Cx * s.C.x) / (fA * s.A.Cx + fB * s.B.Cx + fC * s.C.Cx)
-        @fastmath m.y[i] = (fA * s.A.Cy * s.A.y + fB * s.B.Cy * s.B.y + fC * s.C.Cy * s.C.y) / (fA * s.A.Cy + fB * s.B.Cy + fC * s.C.Cy)
-        @fastmath m.z[i] = (fA * s.A.Cz * s.A.z + fB * s.B.Cz * s.B.z + fC * s.C.Cz * s.C.z) / (fA * s.A.Cz + fB * s.B.Cz + fC * s.C.Cz)
+
+        fxA, fyA, fzA = f.A[i] .* (s.A.cx, s.A.cy, s.A.cz)
+        fxB, fyB, fzB = f.B[i] .* (s.B.cx, s.B.cy, s.B.cz)
+        fxC, fyC, fzC= f.C[i] .* (s.C.cx, s.C.cy, s.C.cz)
+
+        xmix, ymix, zmix = fxA+fxB+fxC, fyA+fyB+fyC, fzA+fzB+fzC
+
+        m.x[i] = (fxA * s.A.x + fxB * s.B.x + fxC * s.C.x) / xmix
+        m.y[i] = (fyA * s.A.y + fyB * s.B.y + fyC * s.C.y) / ymix
+        m.z[i] = (fzA * s.A.z + fzB * s.B.z + fzC * s.C.z) / zmix
+        
+        m.cx[i], m.cy[i], m.cz[i] = xmix, ymix, zmix 
     end
     m
 end

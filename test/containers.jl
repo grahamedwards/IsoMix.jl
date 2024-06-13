@@ -29,9 +29,9 @@
 @test Component(1,1,1,1) === Component2(1,1,1,1)
 @test Component(1,1,1,1,1,1) === Component3(1,1,1,1,1,1)
 
-@test Component(x=1,Cx=1) === Component1(1,1)
-@test Component(y=1,Cy=1,x=1,Cx=1) === Component2(1,1,1,1)
-@test Component(x=1,y=1,z=1,Cx=1,Cy=1,Cz=1) === Component3(1,1,1,1,1,1)
+@test Component(x=1,cx=1) === Component1(1,1)
+@test Component(y=1,cy=1,x=1,cx=1) === Component2(1,1,1,1)
+@test Component(x=1,y=1,z=1,cx=1,cy=1,cz=1) === Component3(1,1,1,1,1,1)
 
 @test (IsoMix.countcomponents(Component(1,1)), IsoMix.countcomponents(Component(1,1,1,1))) === (1,2)
 
@@ -54,8 +54,8 @@ x = Constant(1); @test x.x === 1.
 @test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1)) === Data2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
 @test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Data3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
 
-@test Data(x=Constant(1),Cx=Norm(1,1)) === Data1(Constant(1),Norm(1,1))
-@test Data(x=Constant(1),Cx=Norm(1,1),y=logNorm(1,1),Cy=Unf(1,1)) === Data2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
+@test Data(x=Constant(1),cx=Norm(1,1)) === Data1(Constant(1),Norm(1,1))
+@test Data(x=Constant(1),cx=Norm(1,1),y=logNorm(1,1),cy=Unf(1,1)) === Data2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
 @test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Data3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
 
 # Prior
@@ -93,9 +93,9 @@ testfracbool *= isapprox(testfraction.C, [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
 # Model
 
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2,))).Cx) == length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2))).x) ==3 
+@test length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2,))).cx) == length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2))).x) ==3 
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).x) ==3 
+@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cx) ==3 
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).z) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).x) == 3 
+@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).z) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cz) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cx) == 3 
 

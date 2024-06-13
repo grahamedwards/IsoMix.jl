@@ -76,29 +76,29 @@ see also: [`Component1`](@ref), [`Component2`](@ref), [`Component3`](@ref)
 
 ---
 
-`Component(x, Cx)` -> `Component1`
+`Component(x, cx)` -> `Component1`
 
-`Component(x, Cx, y, Cy)` -> `Component2`
+`Component(x, cx, y, cy)` -> `Component2`
 
-`Component(x, Cx, y, Cy, z, Cz)` -> `Component3`
+`Component(x, cx, y, cy, z, cz)` -> `Component3`
 
-The constructor function accepts values as a list of arguments or as keyword assignments, e.g.: `Component(x=1, Cx=2)`
+The constructor function accepts values as a list of arguments or as keyword assignments, e.g.: `Component(x=1, cx=2)`
 
 """
 abstract type Component <: IsoMixType end
-Component(x::Number, Cx::Number) = Component1(x, Cx)
+Component(x::Number, cx::Number) = Component1(x, cx)
 
-Component(x::Number, Cx::Number, y::Number, Cy::Number) = Component2(x, Cx, y, Cy)
+Component(x::Number, cx::Number, y::Number, cy::Number) = Component2(x, cx, y, cy)
 
-Component(x::Number, Cx::Number, y::Number, Cy::Number, z::Number, Cz::Number) = Component3(x, Cx, y, Cy, z, Cz)
+Component(x::Number, cx::Number, y::Number, cy::Number, z::Number, cz::Number) = Component3(x, cx, y, cy, z, cz)
 
-function Component(;x::Number=NaN, Cx::Number=NaN, y::Number=NaN, Cy::Number=NaN, z::Number=NaN, Cz::Number=NaN) 
-    out = if (z == z) & (Cz == Cz)
-        Component3(x, Cx, y, Cy, z, Cz)
-    elseif (y==y) & (Cy==Cy)
-        Component2(x, Cx, y, Cy)
-    elseif (x==x) & (Cx==Cx)
-        Component1(x,Cx)
+function Component(;x::Number=NaN, cx::Number=NaN, y::Number=NaN, cy::Number=NaN, z::Number=NaN, cz::Number=NaN) 
+    out = if (z == z) & (cz == cz)
+        Component3(x, cx, y, cy, z, cz)
+    elseif (y==y) & (cy==cy)
+        Component2(x, cx, y, cy)
+    elseif (x==x) & (cx==cx)
+        Component1(x,cx)
     else
         error("Improper Component definition")
     end
@@ -113,14 +113,14 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 
 see also: [`Component`](@ref)
 
 """
 struct Component1 <: Component
     x::Float64
-    Cx::Float64
+    cx::Float64
 end 
 
 """
@@ -131,18 +131,18 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
+`cy`| Concentration of y
 
 see also: [`Component`](@ref)
 
 """
 struct Component2 <: Component
     x::Float64
-    Cx::Float64
+    cx::Float64
     y::Float64
-    Cy::Float64
+    cy::Float64
 end 
 
 """
@@ -153,22 +153,22 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
+`cy`| Concentration of y
 `z` | Isotopic composition of z
-`Cz`| Concentration of z
+`cz`| Concentration of z
 
 see also: [`Component`](@ref)
 
 """
 struct Component3 <: Component
     x::Float64
-    Cx::Float64
+    cx::Float64
     y::Float64
-    Cy::Float64
+    cy::Float64
     z::Float64
-    Cz::Float64
+    cz::Float64
 end
 
 
@@ -322,23 +322,23 @@ see also: [`Data1`](@ref), [`Data2`](@ref), [`Data3`](@ref)
 """
 abstract type Data <: IsoMixType end
 
-Data(x::Datum, Cx::Datum) = Data1(x, Cx)
+Data(x::Datum, cx::Datum) = Data1(x, cx)
 
-Data(x::Datum, Cx::Datum, y::Datum, Cy::Datum) = Data2(x, Cx, y, Cy)
+Data(x::Datum, cx::Datum, y::Datum, cy::Datum) = Data2(x, cx, y, cy)
 
-Data(x::Datum, Cx::Datum, y::Datum, Cy::Datum, z::Datum, Cz::Datum) = Data3(x, Cx, y, Cy, z, Cz)
+Data(x::Datum, cx::Datum, y::Datum, cy::Datum, z::Datum, cz::Datum) = Data3(x, cx, y, cy, z, cz)
 
-function Data(;x::Datum=Constant(NaN), Cx::Datum=Constant(NaN), y::Datum=Constant(NaN), Cy::Datum=Constant(NaN), z::Datum=Constant(NaN), Cz::Datum=Constant(NaN)) 
+function Data(;x::Datum=Constant(NaN), cx::Datum=Constant(NaN), y::Datum=Constant(NaN), cy::Datum=Constant(NaN), z::Datum=Constant(NaN), cz::Datum=Constant(NaN)) 
     
-    @assert Constant(NaN) ∉ (x,Cx) "Insufficient components declared."
-    @assert iseven(count(x -> x==Constant(NaN),(x,y,z,Cx,Cy,Cz))) "All components must have paired isotope composition and concentration data."
+    @assert Constant(NaN) ∉ (x,cx) "Insufficient components declared."
+    @assert iseven(count(x -> x==Constant(NaN),(x,y,z,cx,cy,cz))) "All components must have paired isotope composition and concentration data."
 
-    out = if z == Cz == y == Cy == Constant(NaN)
-        Data1(x,Cx)
-    elseif z == Cz == Constant(NaN)
-        Data2(x, Cx, y, Cy)
+    out = if z == cz == y == cy == Constant(NaN)
+        Data1(x,cx)
+    elseif z == cz == Constant(NaN)
+        Data2(x, cx, y, cy)
     else
-        Data3(x, Cx, y, Cy, z, Cz)
+        Data3(x, cx, y, cy, z, cz)
     end
     out
 end
@@ -351,14 +351,14 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 
 see also: [`Datum`](@ref)
 
 """
 struct Data1 <: Data
     x::Datum
-    Cx::Datum
+    cx::Datum
 end
 
 """
@@ -370,18 +370,18 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
+`cy`| Concentration of y
 
 see also: [`Datum`](@ref)
 
 """
 struct Data2 <: Data
     x::Datum
-    Cx::Datum
+    cx::Datum
     y::Datum
-    Cy::Datum
+    cy::Datum
 end
 
 """
@@ -393,22 +393,22 @@ end
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
-`Cy`| Concentration of y
+`cy`| Concentration of y
 `z` | Isotopic composition of z
-`Cz`| Concentration of z
+`cz`| Concentration of z
 
 see also: [`Datum`](@ref)
 
 """
 struct Data3 <: Data
     x::Datum
-    Cx::Datum
+    cx::Datum
     y::Datum
-    Cy::Datum
+    cy::Datum
     z::Datum
-    Cz::Datum
+    cz::Datum
 end
 
 ## Prior
@@ -622,9 +622,9 @@ abstract type Model <: IsoMixType end
 
 Model(f::Fraction,::System{Component1})= Model1(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
-Model(f::Fraction,::System{Component2}) = Model2(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
+Model(f::Fraction,::System{Component2}) = Model2(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
-Model(f::Fraction,::System{Component3}) = Model3(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
+Model(f::Fraction,::System{Component3}) = Model3(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
 """
 
@@ -635,52 +635,62 @@ Model(f::Fraction,::System{Component3}) = Model3(Vector{Float64}(undef,f.n), Vec
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
-`Cx`| Concentration of x
+`cx`| Concentration of x
 
 see also: [`Model`](@ref)
 
 """
 struct Model1 <: Model
     x::Vector{Float64}
-    Cx::Vector{Float64}
+    cx::Vector{Float64}
 end
 
 """
 
     Model2 <: Model
 
-2-dimensional `Model` instance: two species tracking isotopic composition.
+2-dimensional `Model` instance: two species tracking isotopic composition and concentration.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
+`cy`| Concentration of y
 
 see also: [`Model`](@ref)
 
 """
 struct Model2 <: Model
     x::Vector{Float64}
+    cx::Vector{Float64}
     y::Vector{Float64}
+    cy::Vector{Float64}
 end
 
 """
 
     Model3 <: Model
 
-3-dimensional `Model` instance: three species tracking isotopic composition.
+3-dimensional `Model` instance: three species tracking isotopic composition and concentration.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
+`cx`| Concentration of x
 `y` | Isotopic composition of y
+`cy`| Concentration of y
 `z` | Isotopic composition of z
+`cz`| Concentration of z
 
 see also: [`Model`](@ref)
 
 """
 struct Model3 <: Model
     x::Vector{Float64}
+    cx::Vector{Float64}
     y::Vector{Float64}
+    cy::Vector{Float64}
     z::Vector{Float64}
+    cz::Vector{Float64}
 end
