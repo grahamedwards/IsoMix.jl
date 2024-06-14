@@ -694,3 +694,169 @@ struct Model3 <: Model
     z::Vector{Float64}
     cz::Vector{Float64}
 end
+
+"""
+
+    Measurements <: IsoMixType
+
+Struct containing two vector fields corresponding to the mean `m` and 1σ standard deviation (or standard error) `s` of measurements with normally distributed uncertainties (typical of geochemical analyses). All `IsoMix` applications of this struct require `length(m)==length(s)`. Measurements with missing values may either be removed or replaced with `NaN`. 
+
+see also: [`DataSet`](@ref)
+
+---
+
+    Measurements(m,s) 
+    Measurements(; m, s)
+    Measurements(m; s)
+    Measurements() --> returns a null instance of Measurements([],[])
+
+# Examples 
+
+    julia> Measurements([2.,3.],[0.5,0.5])
+    Measurements([2.0, 3.0], [0.5, 0.5])
+
+    julia> Measurements(m=[2.,3.],s=[0.5,0.5])
+    Measurements([2.0, 3.0], [0.5, 0.5])    
+
+    julia> Measurements([2.,3.],s=[0.5,0.5])
+    Measurements([2.0, 3.0], [0.5, 0.5])
+
+    julia> Measurements()
+    Measurements(Float64[], Float64[])
+
+
+"""
+struct Measurements <: IsoMixType
+    m::Vector{Float64}
+    s::Vector{Float64}
+end
+Measurements(; m::Vector{<:Number}=Float64[], s::Vector{<:Number}=Float64[]) = Measurements(m,s)
+Measurements(m::Vector{<:Number}; s::Vector{<:Number}=Float64[]) = Measurements(m,s)
+
+
+
+"""
+
+    DataSet <: IsoMixType
+
+  Abstract supertype for DataSet_ instances, where _ indicates dimensionality. Represents a dataset of measured (normally distributed) data as `Measurements`.
+
+  see also: [`Measurements`](@ref), [`DataSet1`](@ref), [`DataSet2`](@ref), [`DataSet3`](@ref)
+
+  ---
+
+The constructor function accepts a list of `Measurements` instances:
+
+  DataSet(x, cy) -> DataSet1
+  DataSet(x, cx, y, cy) -> DataSet2
+  DataSet(x, cx, y, cy, z, cz) -> DataSet3
+
+For inconsistent datasets, you may declare extant data with keywords:
+
+    DataSet(; x, cx, y, cy, z, cz)
+
+`DataSet` determines the appropriate subtype and all undeclared fields are empty: `Measurements([],[])`
+
+NOTE: the constructor requires that `length(q.m)==length(q.s)` for each `Measurements` instance `q`.
+
+"""
+abstract type DataSet <: IsoMixType end
+function DataSet(x::T, cx::T) where T<:Measurements
+    @assert length(x.m) == length(x.s)
+    @assert length(cx.m) == length(cx.s)
+    DataSet1(x,cx)
+end
+function DataSet(x::T, cx::T, y::T, cy::T) where T<:Measurements
+    @assert length(x.m) == length(x.s)
+    @assert length(cx.m) == length(cx.s)
+    @assert length(y.m) == length(y.s)
+    @assert length(cy.m) == length(cy.s)
+    DataSet2(x,cx,y,cy)
+end
+function DataSet(x::T, cx::T, y::T, cy::T, z::T, cz::T) where T<:Measurements
+    @assert length(x.m) == length(x.s)
+    @assert length(cx.m) == length(cx.s)
+    @assert length(y.m) == length(y.s)
+    @assert length(cy.m) == length(cy.s)
+    @assert length(z.m) == length(z.s)
+    @assert length(cz.m) == length(cz.s)
+    DataSet3(x,cx,y,cy,z,cz)
+end
+function DataSet(; x::T=Measurements(), cx::T=Measurements(), y::T=Measurements(), cy::T=Measurements(), z::T=Measurements(), cz::T=Measurements()) where T<: Measurements
+    if (!isempty(z.m) | !isempty(cz.m))
+        DataSet(x,cx,y,cy,z,cz)
+    elseif (!isempty(y.m) | !isempty(cy.m))
+        DataSet(x,cx,y,cy)
+    else
+        DataSet(x,cx)
+    end
+end
+
+"""
+
+    DataSet1 <: DataSet
+
+`DataSet` instance reflecting measurements of 1 species:
+
+|Fields ||
+|:--|:--|
+`x` | Isotopic composition of x
+`cx`| Concentration of x
+
+see also: [`DataSet`](@ref)
+
+"""
+struct DataSet1 <: DataSet
+    x::Measurements
+    cx::Measurements
+end
+
+"""
+
+    DataSet2 <: DataSet
+
+`DataSet` instance reflecting measurements of 2 species:
+
+|Fields ||
+|:--|:--|
+`x` | Isotopic composition of x
+`cx`| Concentration of x
+`y` | Isotopic composition of y
+`cy`| Concentration of y
+
+see also: [`DataSet`](@ref)
+
+"""
+struct DataSet2 <: DataSet
+    x::Measurements
+    cx::Measurements
+    y::Measurements
+    cy::Measurements
+end
+
+"""
+
+    DataSet3 <: DataSet
+
+`DataSet` instance reflecting measurements of 3 species:
+
+|Fields ||
+|:--|:--|
+`x` | Isotopic composition of x
+`cx`| Concentration of x
+`y` | Isotopic composition of y
+`cy`| Concentration of y
+`z` | Isotopic composition of z
+`cz`| Concentration of z
+
+see also: [`DataSet`](@ref)
+
+"""
+struct DataSet3 <: DataSet
+    x::Measurements
+    cx::Measurements
+    y::Measurements
+    cy::Measurements
+    z::Measurements
+    cz::Measurements
+end
