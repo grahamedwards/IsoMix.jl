@@ -20,22 +20,20 @@ Calculate the loglikelihood that the components in `s` were drawn from the corre
 
 ---
 
-    loglikelihood(m::Vector, d::Datum)
-    loglikelihood(m::Vector, d::Measurement)
+    loglikelihood(m::Vector, d::Measurements)
     loglikelihood(m<:Model , d<:DataSet)
 
 Calculate the loglikelihood that the model compositions/concentrations in `m` were drawn from the corresponding measured distribution(s) in `d`.
 
 """
 loglikelihood(x::Number,D::Norm) = -(x-D.m)*(x-D.m)/(2*D.s*D.s)
-loglikelihood(x::Number,D::logNorm) = @fastmath (lnx = log(x); -lnx-(lnx-D.lm)*(lnx-D.lm) / (2*D.ls*D.ls))
+loglikelihood(x::Number,D::logNorm) = (lnx = log(x); -lnx-(lnx-D.lm)*(lnx-D.lm) / (2*D.ls*D.ls))
 loglikelihood(x::Number,D::Unf) = ifelse(D.a <= x <= D.b, -log(D.b-D.a), -Inf)
 loglikelihood(x::Number,D::Constant) = ifelse(x===D.x, 0, -Inf)
 
 function loglikelihood(c::C, d::D) where {C<:Component, D <: Data}
     @assert fieldnames(C) == fieldnames(D)
     ll = 0.0
-
     @inbounds @simd ivdep for i = fieldnames(C) 
         ll += loglikelihood(getfield(c,i),getfield(d,i))
     end
@@ -45,25 +43,19 @@ end
 function loglikelihood(s::S, p::P) where {S<:System, P<:Prior}
     @assert fieldnames(S) == fieldnames(P)
     ll = 0.0
-    @inbounds @simd ivdep for i = fieldnames(S) # probably batch this at some point.
+    @inbounds for i = fieldnames(S) # probably batch this at some point.
         ll += loglikelihood(getfield(s,i),getfield(p,i))
     end
     ll
 end
 
-function loglikelihood(m::Vector{Float64}, d::Datum)
+function loglikelihood(m::Vector{Float64}, d::Measurements)
     ll = 0.0
-    @inbounds @simd ivdep for i = eachindex(v)
-        ll += loglikelihood(m[i],d)
-    end
-    ll
-end
-
-function loglikelihood(m::Vector{Float64}, d::Measurement)
-    ll = 0.0
-    @inbounds @simd ivdep for i = eachindex(d)
-        lli = loglikelihood(m,Norm(d.m[i], d.s[i]))
-        ll += ifelse(isnan(lli), 0, lli)
+    @inbounds for i = eachindex(d)
+        @inbounds @simd ivdep for j = eachindex(m)
+            lli = loglikelihood(m[j],Norm(d.m[i], d.s[i]))
+            ll += ifelse(isnan(lli), 0, lli)
+        end
     end
     ll
 end
