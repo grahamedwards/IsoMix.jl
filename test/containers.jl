@@ -6,14 +6,19 @@
 @test Data <: IsoMixType
 @test (Data1 <: Data) & (Data2 <: Data) & (Data3 <: Data)
 
+@test DataSet <: IsoMixType
+@test (DataSet1 <: DataSet) & (DataSet2 <: DataSet) & (DataSet3 <: DataSet)
+
 @test Datum <: IsoMixType
-@test (Constant <: Datum) & (Norm <: Datum) & (logNorm <: Datum) & (Unf <: Datum)
+@test prod((Constant, Norm, logNorm, Unf, Unconstrained) .<: Datum)
 
 @test Fraction <: IsoMixType
 @test (Fraction2 <: Fraction) & (Fraction3 <: Fraction)
 
 @test Model <: IsoMixType
 @test (Model1 <: Model) & (Model2 <: Model) & (Model3 <: Model)
+
+@test Measurements <: IsoMixType
 
 @test Prior <: IsoMixType
 @test (Prior2 <: Prior) & (Prior3 <: Prior)
@@ -92,10 +97,26 @@ testfracbool *= isapprox(testfraction.C, [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
 
 # Model
 
-
 @test length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2,))).cx) == length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2))).x) ==3 
 
 @test length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cx) ==3 
 
 @test length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).z) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cz) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cx) == 3 
 
+# Measurements
+
+tv = [1,2,3]
+@test Measurements(tv, tv).m == Measurements(tv, s=tv).m == Measurements(m=tv, s=tv).m
+@test isempty(Measurements().m)
+
+# DataSet
+
+tmeas = Measurements([1,2,3], [1,2,3])
+
+@test DataSet(tmeas,tmeas) == DataSet1(tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas)
+@test DataSet(x=tmeas).x == tmeas
+@test isempty(DataSet(x=tmeas).cx.m)
+
+@test DataSet(tmeas,tmeas, tmeas,tmeas) == DataSet2(tmeas,tmeas, tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas, y=tmeas, cy=tmeas) 
+
+@test DataSet(tmeas,tmeas, tmeas,tmeas,tmeas,tmeas) == DataSet3(tmeas,tmeas, tmeas,tmeas,tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas, y=tmeas, cy=tmeas, z=tmeas, cz=tmeas) 

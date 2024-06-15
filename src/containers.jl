@@ -3,64 +3,44 @@
 
 Supertype containing all custom types and structs in the IsoMix package:
 
+Direct subtypes: [`Component`](@ref), [`Data`](@ref), [`DataSet`](@ref), [`Datum`](@ref), [`Fraction`](@ref), [`Measurements`](@ref), [`Model`](@ref),[`Prior`](@ref), [`System`](@ref) 
+
+---
+```
 IsoMixType
-
-├─ [`Component`](@ref)
-
+├─ Component
 │  ├─ Component1
-
 │  ├─ Component2
-
 │  └─ Component3
-
-├─ [`Data`](@ref)
-
+├─ Data
 │  ├─ Data1
-
 │  ├─ Data2
-
 │  └─ Data3
-
-├─ [`Datum`](@ref)
-
-│  ├─ [`Constant`](@ref)
-
-│  ├─ [`Norm`](@ref)
-
-│  ├─ [`Unf`](@ref)
-
-│  └─ [`logNorm`](@ref)
-
-├─ [`Fraction`](@ref)
-
+├─ DataSet
+│  ├─ DataSet1
+│  ├─ DataSet2
+│  └─ DataSet3
+├─ Datum
+│  ├─ Constant
+│  ├─ Norm
+│  ├─ Unf
+│  └─ logNorm
+├─ Fraction
 │  ├─ Fraction2
-
 │  └─ Fraction3
-
-├─ [`Model`](@ref)
-
+├─ Measurements
+├─ Model
 │  ├─ Model1
-
 │  ├─ Model2
-
 │  └─ Model3
-
-├─ [`Prior`](@ref)
-
+├─ Prior
 │  ├─ Prior2
-
 │  └─ Prior3
-
-└─ [`System`](@ref)
-
-├─ System2
-
-└─ System3
-
-
-# Example
-
-`julia> using AbstractTrees,IsoMix; AbstractTrees.children(d) = subtypes(d); print_tree(IsoMixType)`
+└─ System
+   ├─ System2
+   └─ System3
+```
+[Generated with `using AbstractTrees,IsoMix; AbstractTrees.children(d) = subtypes(d); print_tree(IsoMixType)`]
 
 """
 abstract type IsoMixType end
@@ -308,6 +288,15 @@ A [`Datum`](@ref) instance with a discrete value `x`.
 struct Constant <: Datum
     x::Float64
 end
+
+"""
+
+    Unconstrained <: Datum
+
+A [`Datum`](@ref) instance for an unconstrained variable, functionally similar to `Unf(-∞,∞)`. Typically, using this value is inadvisable.
+
+"""
+struct Unconstrained <: Datum end
 
 ## Data
 

@@ -1,9 +1,11 @@
 module IsoMix
-import StaticArrays
+import StaticArrays, Polyester
 
 export IsoMixType
 export Component, Component1, Component2, Component3
-export Datum, Norm, logNorm, Unf, Constant, Data, Data1, Data2, Data3, Prior, Prior2, Prior3
+export Datum, Norm, logNorm, Unf, Constant, Unconstrained
+export Data, Data1, Data2, Data3
+export Prior, Prior2, Prior3
 export System, System2, System3 
 export Fraction, Fraction2, Fraction3
 export Model, Model1, Model2, Model3

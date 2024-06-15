@@ -21,15 +21,16 @@ Calculate the loglikelihood that the components in `s` were drawn from the corre
 ---
 
     loglikelihood(m::Vector, d::Measurements)
-    loglikelihood(m<:Model , d<:DataSet)
+    loglikelihood(m<:Model , d<:DataSet) 
 
-Calculate the loglikelihood that the model compositions/concentrations in `m` were drawn from the corresponding measured distribution(s) in `d`.
+Calculate the loglikelihood that the model compositions/concentrations in `m` were drawn from the corresponding measured distribution(s) in `d`. The latter method uses `Polyester.@batch`-based multithreading for faster runtimes.
 
 """
 loglikelihood(x::Number,D::Norm) = -(x-D.m)*(x-D.m)/(2*D.s*D.s)
 loglikelihood(x::Number,D::logNorm) = (lnx = log(x); -lnx-(lnx-D.lm)*(lnx-D.lm) / (2*D.ls*D.ls))
 loglikelihood(x::Number,D::Unf) = ifelse(D.a <= x <= D.b, -log(D.b-D.a), -Inf)
-loglikelihood(x::Number,D::Constant) = ifelse(x===D.x, 0, -Inf)
+loglikelihood(x::Number,D::Constant) = ifelse(float(x)===D.x, 0., -Inf)
+loglikelihood(x::Number,::Unconstrained) = 0.
 
 function loglikelihood(c::C, d::D) where {C<:Component, D <: Data}
     @assert fieldnames(C) == fieldnames(D)
@@ -43,7 +44,8 @@ end
 function loglikelihood(s::S, p::P) where {S<:System, P<:Prior}
     @assert fieldnames(S) == fieldnames(P)
     ll = 0.0
-    @inbounds for i = fieldnames(S) # probably batch this at some point.
+    @inbounds for ii = fieldnames(S)
+        i = fn[ii]
         ll += loglikelihood(getfield(s,i),getfield(p,i))
     end
     ll
@@ -51,7 +53,7 @@ end
 
 function loglikelihood(m::Vector{Float64}, d::Measurements)
     ll = 0.0
-    @inbounds for i = eachindex(d)
+    @inbounds for i = eachindex(d.m)
         @inbounds @simd ivdep for j = eachindex(m)
             lli = loglikelihood(m[j],Norm(d.m[i], d.s[i]))
             ll += ifelse(isnan(lli), 0, lli)
@@ -63,12 +65,12 @@ end
 function loglikelihood(m::M, d::D) where {M<:Model, D <:DataSet}
     @assert fieldnames(M) == fieldnames(D)
     ll = 0.0
-
-    @inbounds for i = fieldnames(M) # probably batch this at some point.
+    fn =  fieldnames(M)
+    @inbounds Polyester.@batch reduction=(+,ll) for i = eachindex(fn) 
         ll += loglikelihood(getfield(m,i),getfield(d,i))
     end
     ll
 end
 
-
+# 
 
