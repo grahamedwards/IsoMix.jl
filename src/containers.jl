@@ -736,24 +736,30 @@ Measurements(m::Vector{<:Number}; s::Vector{<:Number}=Float64[]) = Measurements(
 
 The constructor function accepts a list of `Measurements` instances:
 
-  DataSet(x, cy) -> DataSet1
-  DataSet(x, cx, y, cy) -> DataSet2
-  DataSet(x, cx, y, cy, z, cz) -> DataSet3
+Without concentration measurements:
+    DataSet(x, y) -> DataSet2 
+    DataSet(x, y, z) -> DataSet3
+    
+With concentration measurements:
+    DataSet(x=..., cx=...) -> DataSet1
+    DataSet(x, cx, y, cy) -> DataSet2
+    DataSet(x, cx, y, cy, z, cz) -> DataSet3
 
-For inconsistent datasets, you may declare extant data with keywords:
+For all other datasets configurations, declare measurements with keywords:
 
     DataSet(; x, cx, y, cy, z, cz)
 
-`DataSet` determines the appropriate subtype and all undeclared fields are empty: `Measurements([],[])`
+`DataSet` determines the appropriate subtype and all undeclared fields are null, i.e. `Measurements([],[])`
 
 NOTE: the constructor requires that `length(q.m)==length(q.s)` for each `Measurements` instance `q`.
 
 """
 abstract type DataSet <: IsoMixType end
-function DataSet(x::T, cx::T) where T<:Measurements
+function DataSet(x::T, y::T) where T<:Measurements
     @assert length(x.m) == length(x.s)
-    @assert length(cx.m) == length(cx.s)
-    DataSet1(x,cx)
+    @assert length(y.m) == length(y.s)
+    c = Measurements()
+    DataSet2(x,c,y,c)
 end
 function DataSet(x::T, cx::T, y::T, cy::T) where T<:Measurements
     @assert length(x.m) == length(x.s)
@@ -771,13 +777,22 @@ function DataSet(x::T, cx::T, y::T, cy::T, z::T, cz::T) where T<:Measurements
     @assert length(cz.m) == length(cz.s)
     DataSet3(x,cx,y,cy,z,cz)
 end
+
+function DataSet(x::T, y::T, z::T) where T<:Measurements
+    @assert length(x.m) == length(x.s)
+    @assert length(y.m) == length(y.s)
+    @assert length(z.m) == length(z.s)
+    c = Measurements()
+    DataSet3(x,c,y,c,z,c)
+end
+
 function DataSet(; x::T=Measurements(), cx::T=Measurements(), y::T=Measurements(), cy::T=Measurements(), z::T=Measurements(), cz::T=Measurements()) where T<: Measurements
     if (!isempty(z.m) | !isempty(cz.m))
-        DataSet(x,cx,y,cy,z,cz)
+        DataSet3(x,cx,y,cy,z,cz)
     elseif (!isempty(y.m) | !isempty(cy.m))
-        DataSet(x,cx,y,cy)
+        DataSet2(x,cx,y,cy)
     else
-        DataSet(x,cx)
+        DataSet1(x,cx)
     end
 end
 

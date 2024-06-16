@@ -44,8 +44,7 @@ end
 function loglikelihood(s::S, p::P) where {S<:System, P<:Prior}
     @assert fieldnames(S) == fieldnames(P)
     ll = 0.0
-    @inbounds for ii = fieldnames(S)
-        i = fn[ii]
+    @inbounds for i = fieldnames(S)
         ll += loglikelihood(getfield(s,i),getfield(p,i))
     end
     ll

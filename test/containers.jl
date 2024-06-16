@@ -111,9 +111,17 @@ tv = [1,2,3]
 
 # DataSet
 
-tmeas = Measurements([1,2,3], [1,2,3])
+tmeas,tmnull = Measurements([1,2,3], [1,2,3]), Measurements()
 
-@test DataSet(tmeas,tmeas) == DataSet1(tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas)
+@test DataSet(tmeas,tmeas) isa DataSet2
+@test isempty(DataSet(tmeas,tmeas).cx.m) & isempty(DataSet(tmeas,tmeas).cy.m)
+@test DataSet(tmeas,tmeas).x == DataSet(tmeas,tmeas).y
+
+@test DataSet(tmeas,tmeas,tmeas) isa DataSet3
+@test isempty(DataSet(tmeas,tmeas,tmeas).cx.m) & isempty(DataSet(tmeas,tmeas,tmeas).cy.m) & isempty(DataSet(tmeas,tmeas,tmeas).cz.m)
+@test DataSet(tmeas,tmeas,tmeas).x == DataSet(tmeas,tmeas,tmeas).y == DataSet(tmeas,tmeas,tmeas).z
+
+@test DataSet1(tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas)
 @test DataSet(x=tmeas).x == tmeas
 @test isempty(DataSet(x=tmeas).cx.m)
 

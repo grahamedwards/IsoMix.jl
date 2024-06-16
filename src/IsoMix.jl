@@ -19,4 +19,6 @@ include("mix.jl")
 export loglikelihood
 include("statistics.jl")
 
+module Examples include("examples.jl") end
 end
+
