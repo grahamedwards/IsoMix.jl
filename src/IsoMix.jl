@@ -1,5 +1,5 @@
 module IsoMix
-import StaticArrays, Polyester
+import StaticArrays, Polyester, Random
 
 export IsoMixType
 export Component, Component1, Component2, Component3

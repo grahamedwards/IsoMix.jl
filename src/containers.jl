@@ -175,7 +175,7 @@ countcomponents(::C) where C <: Component = div(fieldcount(C),2)
 
 Abstract supertype for `System_` instances, where the `_` indicates dimensionality. Represents a model system composition charaterized its `Component` fields.
 
-see also: [`Prior2`](@ref), [`Prior3`](@ref)
+see also: [`System2`](@ref), [`System3`](@ref)
 
 ---
 The constructor function accepts values as a list of arguments:
@@ -190,8 +190,8 @@ Returns a `System3`
     System(A=..., B=...)
 
 """
-abstract type System{T} <: IsoMixType end
-System(A::T, B::T) where T <: Component= System2(A,B)
+abstract type System{T<:Component} <: IsoMixType end
+System(A::T, B::T) where T <: Component = System2(A,B)
 System(A::T, B::T, C::T) where T <: Component = System3(A,B,C)
 
 """
@@ -237,7 +237,7 @@ end
 
 Abstract supertype for `Datum` instances.
 
-see also: [`Constant`](@ref), [`Unf`](@ref), [`Norm`](@ref), [`logNorm`](@ref)
+see also: [`Constant`](@ref), [`Unf`](@ref), [`Norm`](@ref), [`logNorm`](@ref), [`Unconstrained`](@ref)
 
 """
 abstract type Datum <: IsoMixType end 
@@ -422,9 +422,9 @@ Returns a `Prior3`
 Note: each `Data` must be of the same subtype (i.e. consistent number of components within each endmember of a system).
 
 """
-abstract type Prior <: IsoMixType end
-Prior(A::Data, B::Data) = Prior2(A,B)
-Prior(A::Data, B::Data, C::Data) = Prior3(A,B,C)
+abstract type Prior{T<:Data} <: IsoMixType end
+Prior(A::T, B::T) where T<:Data = Prior2(A,B)
+Prior(A::T, B::T, C::T) where T<:Data = Prior3(A,B,C)
 
 """
     Prior2 <: Prior
@@ -438,7 +438,7 @@ Prior(A::Data, B::Data, C::Data) = Prior3(A,B,C)
 
 see also: [`Prior`](@ref)
 """
-struct Prior2{T} <:Prior where T <: Data
+struct Prior2{T<:Data} <: Prior{T}
     A::T
     B::T
 end
@@ -455,8 +455,9 @@ end
 `C` | Endmember/component C
 
 see also: [`Prior`](@ref)
+
 """
-struct Prior3{T} <:Prior where T<:Data
+struct Prior3{T<:Data} <: Prior{T}
     A::T
     B::T
     C::T
@@ -494,9 +495,9 @@ Returns a `Fraction3` with linearly spaced fractional combinations of components
 
 ---
 
-    Fraction(D, n=101)
+    Fraction(dim, n=101)
 
-Given a provided number of components `D` (2 or 3), returns a corresponding `Fraction` instance with component concentrations of 0 to 1. 
+Given a provided number of components/dimensions `dim` (2 or 3), returns a corresponding `Fraction` instance with component concentrations of 0 to 1. 
 
 # Example
     julia> Fraction(2,n=3)
@@ -864,3 +865,8 @@ struct DataSet3 <: DataSet
     z::Measurements
     cz::Measurements
 end
+
+
+
+
+    
