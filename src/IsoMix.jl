@@ -19,6 +19,9 @@ include("mix.jl")
 export loglikelihood
 include("statistics.jl")
 
+export initialguess,initialjump, jump, drawjump, update
+include("metropolis.jl")
+
 module Examples include("examples.jl") end
 end
 

@@ -111,7 +111,7 @@ function update(s::System2{Component2}, si::Symbol, ci::Symbol, v::Float64)
     end
 end
 
-function update(s::System3{Component1}, si::Symbol, ci::Symbol, v::Float64)
+function update(s::System2{Component1}, si::Symbol, ci::Symbol, v::Float64)
     X = ifelse(si==:A,s.A,x.B)
     X = Component1(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx))
 
@@ -122,22 +122,6 @@ function update(s::System3{Component1}, si::Symbol, ci::Symbol, v::Float64)
 end
 
 
-# function mixtropolis
-prior, dataset = Phillips2002()
 
-n = 101
-
-mixingproportions=(0,1,0,1)
-
-fraction = Fraction(mixingproportions..., n=n)
-
-
-p, j = initialguess(prior), initialjump(prior)
-
-m = Model(fraction,system)
-
-mix! 
-
-ll = 
 
 
