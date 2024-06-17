@@ -10,6 +10,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 julia = "1.10"
+Polyester = "0.7"
 
 [extras]
 StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
