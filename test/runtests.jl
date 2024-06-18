@@ -13,3 +13,4 @@ Base.isapprox(x::T,y::T) where T <: AbstractArray = prod( x .≈ y) # Returns tr
 @testset "Containers and constructors" begin include("containers.jl") end
 @testset "Mixing math" begin include("mix.jl") end
 @testset "Statistics" begin include("statistics.jl") end
+@testset "Metropolis" begin include("metropolis.jl") end

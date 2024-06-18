@@ -17,9 +17,9 @@ function initialguess(p::P) where {D<:Data, P<:Prior{D}}
     return System(prior...)
 end
 initialguess(x::Norm) = x.m 
-initialguess(x::logNorm) = x.lm
+initialguess(x::logNorm) = exp(x.lm)
 initialguess(x::Unf) = (x.b + x.a)/2
-intialguess(x::Constant) = x.x
+initialguess(x::Constant) = x.x
 initialguess(::Unconstrained) = 0.5
 
 
@@ -45,7 +45,7 @@ end
 initialjump(x::Norm) = x.s
 initialjump(x::logNorm) = x.ls 
 initialjump(x::Unf) = (x.b - x.a)/4
-intialjump(x::Constant) = 0
+initialjump(x::Constant) = 0
 initialjump(::Unconstrained) = 0.1
 
 
@@ -93,12 +93,7 @@ function update(s::System3{Component3}, si::Symbol, ci::Symbol, v::Float64)
     X = ifelse(si==:C,s.C,X)
 
     X = Component3(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy), ifelse(ci==:z,v,X.z), ifelse(ci==:cz,v,X.cz))
-
-    if si==:A System3(X,B,C)
-    elseif si==:B System3(A,X,C)
-    elseif si==:C System3(A,B,X)
-    else error("System component/endmember must be A, B, or C")
-    end
+    reassigncomponents(si,X,s.A,s.B,s.C)
 end
 
 function update(s::System3{Component2}, si::Symbol, ci::Symbol, v::Float64)
@@ -107,12 +102,7 @@ function update(s::System3{Component2}, si::Symbol, ci::Symbol, v::Float64)
     X = ifelse(si==:C,s.C,X)
 
     X = Component2(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy))
-
-    if si==:A System3(X,B,C)
-    elseif si==:B System3(A,X,C)
-    elseif si==:C System3(A,B,X)
-    else error("System component/endmember must be A, B, or C")
-    end
+    reassigncomponents(si,X,s.A,s.B,s.C)
 end
 
 function update(s::System3{Component1}, si::Symbol, ci::Symbol, v::Float64)
@@ -121,45 +111,39 @@ function update(s::System3{Component1}, si::Symbol, ci::Symbol, v::Float64)
     X = ifelse(si==:C,s.C,X)
 
     X = Component1(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx))
+    reassigncomponents(si,X,s.A,s.B,s.C)
+end
 
+function update(s::System2{Component3}, si::Symbol, ci::Symbol, v::Float64)
+    X = ifelse(si==:A,s.A,s.B)
+    X = Component3(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy), ifelse(ci==:z,v,X.z), ifelse(ci==:cz,v,X.cz))
+    reassigncomponents(si,X,s.A,s.B)
+end
+
+function update(s::System2{Component2}, si::Symbol, ci::Symbol, v::Float64)
+    X = ifelse(si==:A,s.A,s.B)
+    X = Component2(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy))
+    reassigncomponents(si,X,s.A,s.B)
+end
+
+function update(s::System2{Component1}, si::Symbol, ci::Symbol, v::Float64)
+    X = ifelse(si==:A,s.A,s.B)
+    X = Component1(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx))
+    reassigncomponents(si,X,s.A,s.B)
+end
+
+
+function reassigncomponents(si::Symbol,X::T, A::T, B::T) where T<:Component
+    if si==:A System2(X,B)
+    elseif si==:B System2(A,X)
+    else error("System component/endmember must be A or B")
+    end
+end
+function reassigncomponents(si::Symbol,X::T, A::T, B::T, C::T) where T<:Component
     if si==:A System3(X,B,C)
     elseif si==:B System3(A,X,C)
     elseif si==:C System3(A,B,X)
     else error("System component/endmember must be A, B, or C")
     end
 end
-
-function update(s::System2{Component3}, si::Symbol, ci::Symbol, v::Float64)
-    X = ifelse(si==:A,s.A,s.B)
-    X = Component3(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy), ifelse(ci==:z,v,X.z), ifelse(ci==:cz,v,X.cz))
-
-    if si==:A System2(X,s.B)
-    elseif si==:B System2(s.A,X)
-    else error("System component/endmember must be A or B")
-    end
-end
-
-function update(s::System2{Component2}, si::Symbol, ci::Symbol, v::Float64)
-    X = ifelse(si==:A,s.A,s.B)
-    X = Component2(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx), ifelse(ci==:y,v,X.y), ifelse(ci==:cy,v,X.cy))
-
-    if si==:A System2(X,s.B)
-    elseif si==:B System2(s.A,X)
-    else error("System component/endmember must be A or B")
-    end
-end
-
-function update(s::System2{Component1}, si::Symbol, ci::Symbol, v::Float64)
-    X = ifelse(si==:A,s.A,s.B)
-    X = Component1(ifelse(ci==:x,v,X.x), ifelse(ci==:cx,v,X.cx))
-
-    if si==:A System2(X,s.B)
-    elseif si==:B System2(s.A,X)
-    else error("System component/endmember must be A or B")
-    end
-end
-
-
-
-
 
