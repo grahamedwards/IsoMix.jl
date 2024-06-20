@@ -1,4 +1,4 @@
-function mixtropolis(prior::Prior, dataset::DataSet; nodes::Int=1001, burninsteps::Int=10_000, chainsteps::Int=10_000, mixtures::Union{Tuple{Number,Number},Tuple{Number,Number,Number,Number}}=(0,0), updates::Int = 10, rng::Random.AbstractRNG = Random.Xoshiro())
+function mixtropolis(prior::Prior, dataset::Measurements; nodes::Int=1001, burninsteps::Int=10_000, chainsteps::Int=10_000, mixtures::Union{Tuple{Number,Number},Tuple{Number,Number,Number,Number}}=(0,0), updates::Int = 10, rng::Random.AbstractRNG = Random.Xoshiro())
 
     jumpscale = 2.9
 
@@ -33,7 +33,7 @@ function mixtropolis(prior::Prior, dataset::DataSet; nodes::Int=1001, burninstep
         if log(rand(rng)) < (llϕ-ll) 
             j = update(j,jumpinfo[1], jumpinfo[2], jumpinfo[3]*jumpscale) # update j
             p, ll = ϕ, llϕ  # update proposal and log-likelihood
-            burninacceptance=+1        
+            burninacceptance+=1        
         end
 
         if iszero(i % burnupdate) # Update progress
@@ -70,8 +70,8 @@ function mixtropolis(prior::Prior, dataset::DataSet; nodes::Int=1001, burninstep
     end
 
     println("\n\n")
+    
     outnames = (extractfields(p)..., :ll, :accept)
     outtuple = ( (chains[i,:] for i =axes(chains,1))..., lldist, chainacceptance )
-
     NamedTuple{outnames}(outtuple)
 end

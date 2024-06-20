@@ -6,8 +6,8 @@
 @test Data <: IsoMixType
 @test (Data1 <: Data) & (Data2 <: Data) & (Data3 <: Data)
 
-@test DataSet <: IsoMixType
-@test (DataSet1 <: DataSet) & (DataSet2 <: DataSet) & (DataSet3 <: DataSet)
+@test Measurements <: IsoMixType
+@test (Measurements1 <: Measurements) & (Measurements2 <: Measurements) & (Measurements3 <: Measurements)
 
 @test Datum <: IsoMixType
 @test prod((Constant, Norm, logNorm, Unf, Unconstrained) .<: Datum)
@@ -105,26 +105,16 @@ testfracbool *= isapprox(testfraction.C, [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
 
 # Measurements
 
-tv = [1,2,3]
-@test Measurements(tv, tv).m == Measurements(tv, s=tv).m == Measurements(m=tv, s=tv).m
-@test isempty(Measurements().m)
+@test Measurements(x = [1 2; 3 4], cx = [5 6; 7 8]) isa Measurements1
+@test Measurements(x = [1 2; 3 4], cx = [5 6; 7 8]).x == Datum[Norm(1.0, 2.0), Norm(3.0, 4.0)]
 
-# DataSet
+@test Measurements([1 2; 3 4], [5 6; 7 8]) isa Measurements2
+@test Measurements([1 2; 3 4], [5 6; 7 8]).cx == Datum[Unconstrained(), Unconstrained()]
+@test Measurements([1 2; 3 4], [5 6; 7 8]).y == Datum[Norm(5.0, 6.0), Norm(7.0, 8.0)]
 
-tmeas,tmnull = Measurements([1,2,3], [1,2,3]), Measurements()
+@test Measurements([1 2; 3 4], [5 6; 7 8], [9 10; 11 12]) isa Measurements3
+@test Measurements([1 2; 3 4], [5 6; 7 8], [9 10; 11 12]).cz == Datum[Unconstrained(), Unconstrained()]
+@test Measurements([1 2; 3 4], [5 6; 7 8], [9 10; 11 12]).z == Datum[Norm(9.0, 10.0), Norm(11.0, 12.0)]
 
-@test DataSet(tmeas,tmeas) isa DataSet2
-@test isempty(DataSet(tmeas,tmeas).cx.m) & isempty(DataSet(tmeas,tmeas).cy.m)
-@test DataSet(tmeas,tmeas).x == DataSet(tmeas,tmeas).y
-
-@test DataSet(tmeas,tmeas,tmeas) isa DataSet3
-@test isempty(DataSet(tmeas,tmeas,tmeas).cx.m) & isempty(DataSet(tmeas,tmeas,tmeas).cy.m) & isempty(DataSet(tmeas,tmeas,tmeas).cz.m)
-@test DataSet(tmeas,tmeas,tmeas).x == DataSet(tmeas,tmeas,tmeas).y == DataSet(tmeas,tmeas,tmeas).z
-
-@test DataSet1(tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas)
-@test DataSet(x=tmeas).x == tmeas
-@test isempty(DataSet(x=tmeas).cx.m)
-
-@test DataSet(tmeas,tmeas, tmeas,tmeas) == DataSet2(tmeas,tmeas, tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas, y=tmeas, cy=tmeas) 
-
-@test DataSet(tmeas,tmeas, tmeas,tmeas,tmeas,tmeas) == DataSet3(tmeas,tmeas, tmeas,tmeas,tmeas,tmeas) == DataSet(x=tmeas,cx=tmeas, y=tmeas, cy=tmeas, z=tmeas, cz=tmeas) 
+@test Measurements([1 2; 3 4], [5 6; 7 8], [9 10; 11 12], [13 14; 15 16]) isa Measurements2
+@test Measurements([1 2; 3 4], [5 6; 7 8], [9 10; 11 12], [13 14; 15 16], [17 18; 19 20], [21 22; 23 24]) isa Measurements3
