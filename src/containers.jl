@@ -3,7 +3,7 @@
 
 Supertype containing all custom types and structs in the IsoMix package:
 
-Direct subtypes: [`Component`](@ref), [`Data`](@ref), [`DataSet`](@ref), [`Datum`](@ref), [`Fraction`](@ref), [`Measurements`](@ref), [`Model`](@ref),[`Prior`](@ref), [`System`](@ref) 
+Direct subtypes: [`Component`](@ref), [`Data`](@ref), [`Measurements`](@ref), [`Datum`](@ref), [`Fraction`](@ref), [`Measurements`](@ref), [`Model`](@ref),[`Prior`](@ref), [`System`](@ref) 
 
 ---
 ```
@@ -293,7 +293,7 @@ end
 
     Unconstrained <: Datum
 
-A [`Datum`](@ref) instance for an unconstrained variable, functionally similar to `Unf(-∞,∞)`. Typically, using this value is inadvisable.
+A [`Datum`](@ref) instance for an unconstrained variable, functionally similar to `Unf(-∞,∞)` or an unmeasured `Measurements` datum. Typically, using this value is inadvisable.
 
 """
 struct Unconstrained <: Datum end
@@ -685,188 +685,228 @@ struct Model3 <: Model
     cz::Vector{Float64}
 end
 
+## Measurements
+
 """
 
     Measurements <: IsoMixType
 
-Struct containing two vector fields corresponding to the mean `m` and 1σ standard deviation (or standard error) `s` of measurements with normally distributed uncertainties (typical of geochemical analyses). All `IsoMix` applications of this struct require `length(m)==length(s)`. Measurements with missing values may either be removed or replaced with `NaN`. 
+Abstract supertype for Measurements_ instances, where _ indicates dimensionality. Represents a dataset of measured (normally distributed) data as vectors of [`Norm`](@ref) instances. Absent `Measurement` fields are represented as vectors of [`Unconstrained`](@ref) and do not affect [`loglikelihood`](@ref) calculations. 
 
-see also: [`DataSet`](@ref)
+see also: [`Measurements`](@ref), [`Measurements1`](@ref), [`Measurements2`](@ref), [`Measurements3`](@ref)
 
----
+# Construction
 
-    Measurements(m,s) 
-    Measurements(; m, s)
-    Measurements(m; s)
-    Measurements() --> returns a null instance of Measurements([],[])
+The constructor function `Measurements(...)` takes `nx2` matrices, where `n` represents the number of measured samples in the dataset, and `n` must be the same for all provided matrices. Each matrix represents a series of measurements (e.g. isotopic composition or abundance measurement) for a given species. The table below defines all possible fields of a `Measurements` and which `Measurements` subtypes contain them (denoted with a ✓):
 
-# Examples 
+|Fields || `Measurements1` | `Measurements2` | `Measurements3`
+|:--|:--| :--: | :-: | :-: |
+`x` | Isotopic composition of x | ✓ | ✓ | ✓ |
+`cx`| Concentration of x | ✓ | ✓ | ✓ |
+|||||
+`y` | Isotopic composition of y |  | ✓ | ✓ |
+`cy`| Concentration of y |  | ✓ | ✓ |
+|||||
+`z` | Isotopic composition of z |  |  | ✓ |
+`cz`| Concentration of z |  |  | ✓ |
 
-    julia> Measurements([2.,3.],[0.5,0.5])
-    Measurements([2.0, 3.0], [0.5, 0.5])
+Note that each row among the `Measurement` fields corresponds to a specific sample, so provided matrices must consistently reflect the same sample in each row. Measurements with missing values must be replaced with `NaN`. 
 
-    julia> Measurements(m=[2.,3.],s=[0.5,0.5])
-    Measurements([2.0, 3.0], [0.5, 0.5])    
-
-    julia> Measurements([2.,3.],s=[0.5,0.5])
-    Measurements([2.0, 3.0], [0.5, 0.5])
-
-    julia> Measurements()
-    Measurements(Float64[], Float64[])
-
-
-"""
-struct Measurements <: IsoMixType
-    m::Vector{Float64}
-    s::Vector{Float64}
-end
-Measurements(; m::Vector{<:Number}=Float64[], s::Vector{<:Number}=Float64[]) = Measurements(m,s)
-Measurements(m::Vector{<:Number}; s::Vector{<:Number}=Float64[]) = Measurements(m,s)
-
-
-
-"""
-
-    DataSet <: IsoMixType
-
-  Abstract supertype for DataSet_ instances, where _ indicates dimensionality. Represents a dataset of measured (normally distributed) data as `Measurements`.
-
-  see also: [`Measurements`](@ref), [`DataSet1`](@ref), [`DataSet2`](@ref), [`DataSet3`](@ref)
-
-  ---
+## Inputing data into `Measurements()`
 
 The constructor function accepts a list of `Measurements` instances:
 
 Without concentration measurements:
-    DataSet(x, y) -> DataSet2 
-    DataSet(x, y, z) -> DataSet3
+    Measurements(x, y) -> Measurements2 
+    Measurements(x, y, z) -> Measurements3
     
 With concentration measurements:
-    DataSet(x=..., cx=...) -> DataSet1
-    DataSet(x, cx, y, cy) -> DataSet2
-    DataSet(x, cx, y, cy, z, cz) -> DataSet3
+
+    Measurements(x=..., cx=...) -> Measurements1
+    Measurements(x, cx, y, cy) -> Measurements2
+    Measurements(x, cx, y, cy, z, cz) -> Measurements3
 
 For all other datasets configurations, declare measurements with keywords:
 
-    DataSet(; x, cx, y, cy, z, cz)
+    Measurements(; x, cx, y, cy, z, cz)
 
-`DataSet` determines the appropriate subtype and all undeclared fields are null, i.e. `Measurements([],[])`
+...which determines the appropriate subtype and all undeclared fields return vectors of `Unconstrained` instances.
 
-NOTE: the constructor requires that `length(q.m)==length(q.s)` for each `Measurements` instance `q`.
+## Examples
+
+```julia
+
+julia> Measurements(x = [1 2; 3 4], cx = [5 6; 7 8])
+Measurements1(Datum[Norm(1.0, 2.0), Norm(3.0, 4.0)], Datum[Norm(5.0, 6.0), Norm(7.0, 8.0)])
+
+julia> m2d = Measurements([1 2; 3 4], [5 6; 7 NaN]); 
+
+julia> m2d.x
+2-element Vector{Datum}:
+ Norm(1.0, 2.0)
+ Norm(3.0, 4.0)
+
+julia> m2d.cx
+2-element Vector{Datum}:
+ Unconstrained()
+ Unconstrained()
+
+julia> m2d.y
+2-element Vector{Datum}:
+ Norm(5.0, 6.0)
+ Norm(7.0, NaN)
+
+julia> m2d = Measurements([1 2; 3 4], [5 6; 7 8; 9 10])
+ERROR: AssertionError: x & y must have the same number of entries (rows). Use NaN for missing values.
+
+```
 
 """
-abstract type DataSet <: IsoMixType end
-function DataSet(x::T, y::T) where T<:Measurements
-    @assert length(x.m) == length(x.s)
-    @assert length(y.m) == length(y.s)
-    c = Measurements()
-    DataSet2(x,c,y,c)
-end
-function DataSet(x::T, cx::T, y::T, cy::T) where T<:Measurements
-    @assert length(x.m) == length(x.s)
-    @assert length(cx.m) == length(cx.s)
-    @assert length(y.m) == length(y.s)
-    @assert length(cy.m) == length(cy.s)
-    DataSet2(x,cx,y,cy)
-end
-function DataSet(x::T, cx::T, y::T, cy::T, z::T, cz::T) where T<:Measurements
-    @assert length(x.m) == length(x.s)
-    @assert length(cx.m) == length(cx.s)
-    @assert length(y.m) == length(y.s)
-    @assert length(cy.m) == length(cy.s)
-    @assert length(z.m) == length(z.s)
-    @assert length(cz.m) == length(cz.s)
-    DataSet3(x,cx,y,cy,z,cz)
+abstract type Measurements <: IsoMixType end
+
+function Measurements(x::Matrix, y::Matrix)
+    @assert size(x,1) == size(y,1) "x & y must have the same number of entries (rows). Use NaN for missing values."
+    @assert size(x,2) == size(y,2) == 2 "all entries must have only 2 columns"
+    
+    n = size(x,1)
+    xd, yd = (Vector{Norm}(undef,n) for i=1:2)
+    
+    @inbounds for i in 1:n
+        xd[i] = Norm(x[i,1], x[i,2])
+        yd[i] = Norm(y[i,1], y[i,2])
+    end
+    c = fill(Unconstrained(),n)
+    Measurements2(xd,c,yd,c)
 end
 
-function DataSet(x::T, y::T, z::T) where T<:Measurements
-    @assert length(x.m) == length(x.s)
-    @assert length(y.m) == length(y.s)
-    @assert length(z.m) == length(z.s)
-    c = Measurements()
-    DataSet3(x,c,y,c,z,c)
+function Measurements(x::Matrix, y::Matrix, z::Matrix)
+    @assert size(x,1) == size(y,1) == size(z,1) "x, y, & z must have the same number of entries (rows). Use NaN for missing values."
+    @assert size(x,2) == size(y,2) == size(z,2) == 2 "all entries must have only 2 columns"
+    
+    n = size(x,1)
+    xd,yd,zd = (Vector{Norm}(undef,n) for i=1:3)
+    
+    @inbounds for i in 1:n
+        xd[i] = Norm(x[i,1], x[i,2])
+        yd[i] = Norm(y[i,1], y[i,2])
+        zd[i] = Norm(z[i,1], z[i,2])
+    end
+    c = fill(Unconstrained(),n)
+    Measurements3(xd,c,yd,c,zd,c)
 end
 
-function DataSet(; x::T=Measurements(), cx::T=Measurements(), y::T=Measurements(), cy::T=Measurements(), z::T=Measurements(), cz::T=Measurements()) where T<: Measurements
-    if (!isempty(z.m) | !isempty(cz.m))
-        DataSet3(x,cx,y,cy,z,cz)
-    elseif (!isempty(y.m) | !isempty(cy.m))
-        DataSet2(x,cx,y,cy)
+function Measurements(x::Matrix, cx::Matrix, y::Matrix, cy::Matrix)
+    @assert size(x,1) == size(cx,1) == size(y,1) == size(cy,1) "x, cx, y, & cy must have the same number of entries (rows). Use NaN for missing values."
+    @assert size(x,2) == size(cx,2) == size(y,2) == size(cy,2) == 2 "all entries must have only 2 columns"
+    
+    n = size(x,1)
+    xd,cxd,yd,cyd = (Vector{Norm}(undef,n) for i=1:4)
+    
+    @inbounds for i in 1:n
+        xd[i] = Norm(x[i,1], x[i,2])
+        yd[i] = Norm(y[i,1], y[i,2])
+        cxd[i] = Norm(cx[i,1], cx[i,2])
+        cyd[i] = Norm(cy[i,1], cy[i,2])
+    end
+    Measurements2(xd,cxd,yd,cyd)
+end
+
+function Measurements(x::Matrix, cx::Matrix, y::Matrix, cy::Matrix, z::Matrix, cz::Matrix)
+    @assert size(x,1) == size(cx,1) == size(y,1) == size(cy,1) == size(z,1) == size(cz,1) "x, cx, y, cy, z, & cz must have the same number of entries (rows). Use NaN for missing values."
+    @assert size(x,2) == size(cx,2) == size(y,2) == size(cy,2) == size(z,2) == size(cz,2) == 2 "all entries must have only 2 columns"
+
+    n = size(x,1)
+    xd,cxd,yd,cyd,zd,czd = (Vector{Norm}(undef,n) for i=1:6)
+
+    @inbounds for i in 1:n
+        xd[i] = Norm(x[i,1], x[i,2])
+        yd[i] = Norm(y[i,1], y[i,2])
+        zd[i] = Norm(z[i,1], z[i,2])
+        cxd[i] = Norm(cx[i,1], cx[i,2])
+        cyd[i] = Norm(cy[i,1], cy[i,2])
+        czd[i] = Norm(cz[i,1], cz[i,2])
+    end
+    c = fill(Unconstrained(),n)
+    Measurements3(xd,c,yd,c,zd,czd)
+end
+
+function Measurements(; x::Matrix=[Inf Inf], cx::Matrix=[Inf Inf], y::Matrix=[Inf Inf], cy::Matrix=[Inf Inf], z::Matrix=[Inf Inf], cz::Matrix=[Inf Inf])
+    @assert size(x,2) == size(cx,2) == size(y,2) == size(cy,2) == size(z,2) == size(cz,2) == 2 "All entries must have only 2 columns"
+    @assert x != [Inf Inf] "x must be defined. Provide a matrix of measurements for x."
+    
+    n = size(x,1)
+    null = [Inf Inf] 
+    sizetest = cx == null || size(cx,1) == n 
+    sizetest *= y == null  || size(y,1) == n 
+    sizetest *= cy == null || size(cy,1) == n
+    sizetest *= z == null  || size(z,1) == n
+    sizetest *= cz == null || size(cz,1) == n 
+    @assert sizetest "All provided inputs must have the same number of entries (rows). Use NaN for missing values."
+    
+    xd = Vector{Norm}(undef,n)
+    cxd = cx == null ? Vector{Unconstrained}(undef,n) : Vector{Norm}(undef,n)
+    yd = y == null ? Vector{Unconstrained}(undef,n) : Vector{Norm}(undef,n)
+    cyd = cy == null ? Vector{Unconstrained}(undef,n) : Vector{Norm}(undef,n)
+    zd = z == null ? Vector{Unconstrained}(undef,n) : Vector{Norm}(undef,n)
+    czd = cz == null ? Vector{Unconstrained}(undef,n) : Vector{Norm}(undef,n)
+    
+    @inbounds for i in 1:n
+        xd[i] = Norm(x[i,1], x[i,2])
+        cx == null || (cxd[i] = Norm(cx[i,1], cx[i,2]))
+        y == null || (yd[i] = Norm(y[i,1], y[i,2]))
+        cy == null || (cyd[i] = Norm(cy[i,1], cy[i,2]))
+        z == null || (zd[i] = Norm(z[i,1], z[i,2]))
+        cz == null || (czd[i] = Norm(cz[i,1], cz[i,2]))
+    end
+    
+    if eltype(czd) == Norm || eltype(zd) == Norm
+        Measurements3(xd,cxd,yd,cyd,zd,czd)
+    elseif eltype(cyd) == Norm || eltype(yd) == Norm
+        Measurements2(xd,cxd,yd,cyd)
     else
-        DataSet1(x,cx)
+        Measurements1(xd,cxd)
     end
 end
 
-"""
-
-    DataSet1 <: DataSet
-
-`DataSet` instance reflecting measurements of 1 species:
-
-|Fields ||
-|:--|:--|
-`x` | Isotopic composition of x
-`cx`| Concentration of x
-
-see also: [`DataSet`](@ref)
 
 """
-struct DataSet1 <: DataSet
-    x::Measurements
-    cx::Measurements
-end
-
-"""
-
-    DataSet2 <: DataSet
-
-`DataSet` instance reflecting measurements of 2 species:
-
-|Fields ||
-|:--|:--|
-`x` | Isotopic composition of x
-`cx`| Concentration of x
-`y` | Isotopic composition of y
-`cy`| Concentration of y
-
-see also: [`DataSet`](@ref)
-
-"""
-struct DataSet2 <: DataSet
-    x::Measurements
-    cx::Measurements
-    y::Measurements
-    cy::Measurements
-end
-
-"""
-
-    DataSet3 <: DataSet
-
-`DataSet` instance reflecting measurements of 3 species:
-
-|Fields ||
-|:--|:--|
-`x` | Isotopic composition of x
-`cx`| Concentration of x
-`y` | Isotopic composition of y
-`cy`| Concentration of y
-`z` | Isotopic composition of z
-`cz`| Concentration of z
-
-see also: [`DataSet`](@ref)
-
-"""
-struct DataSet3 <: DataSet
-    x::Measurements
-    cx::Measurements
-    y::Measurements
-    cy::Measurements
-    z::Measurements
-    cz::Measurements
-end
-
-
-
-
     
+    Measurements1 <: Measurements
+
+[`Measurements`](@ref) instance reflecting isotope and abundance measurements of 1 species: x.
+
+"""
+struct Measurements1 <: Measurements
+    x::Vector{Datum} 
+    cx::Vector{Datum} 
+end
+
+"""
+
+    Measurements2 <: Measurements
+
+[`Measurements`](@ref) instance reflecting isotope and abundance measurements of 2 species: x, y.
+
+"""
+struct Measurements2 <: Measurements
+    x::Vector{Datum} 
+    cx::Vector{Datum} 
+    y::Vector{Datum} 
+    cy::Vector{Datum} 
+end
+
+"""
+
+    Measurements3 <: Measurements
+
+[`Measurements`](@ref) instance reflecting isotope and abundance measurements of 3 species: x, y, z.
+
+"""
+struct Measurements3 <: Measurements
+    x::Vector{Datum} 
+    cx::Vector{Datum} 
+    y::Vector{Datum} 
+    cy::Vector{Datum} 
+    z::Vector{Datum} 
+    cz::Vector{Datum} 
+end

@@ -20,10 +20,11 @@ Calculate the loglikelihood that the components in `s` were drawn from the corre
 
 ---
 
-    loglikelihood(m::Vector, d::Measurements)
-    loglikelihood(m<:Model , d<:DataSet) 
+    loglikelihood(model<:Model , measurements<:Measurements) 
 
-Calculate the loglikelihood that the model compositions/concentrations in `m` were drawn from the corresponding measured distribution(s) in `d`. The latter method uses `Polyester.@batch`-based multithreading for faster runtimes.
+Calculate the likelihood (ℓ) that the (highest likelihood) `model` compositions were drawn from the distributions in `measurements`. Uses `Polyester.@batch`-based multithreading for faster runtimes. 
+
+Note that rather than calculating the ℓ of every model composition relative to the corresponding distribution in 'measurements`, only the highest ℓ among all instances in `model` and a given instance in `measurements` are summed. This prevents `mixtropolis` from converging on small parameter spaces that only just fit around the `measurements`.
 
 """
 loglikelihood(x::Number,D::Norm) = -(x-D.m)*(x-D.m)/(2*D.s*D.s)
@@ -50,26 +51,52 @@ function loglikelihood(s::S, p::P) where {S<:System, P<:Prior}
     ll
 end
 
-function loglikelihood(m::Vector{Float64}, d::Measurements)
-    ll = 0.0
-    @inbounds for i = eachindex(d.m)
-        @inbounds @simd ivdep for j = eachindex(m)
-            lli = loglikelihood(m[j],Norm(d.m[i], d.s[i]))
-            ll += ifelse(isnan(lli), 0, lli)
+function loglikelihood(model::Model3, measurements::Measurements3)
+    ll = -Inf
+    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+        mx, mcx, my, mcy, mz, mcz = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i], measurements.z[i], measurements.cz[i]
+        llj = -Inf
+        @inbounds @simd ivdep for j = eachindex(model.x)
+            llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) + nanll(model.z[j], mz) + nanll(model.cz[j], mcz) 
+            llj = ifelse(llj > ll, llj, ll)
         end
+        ll += llj
+    end
+    ll
+end
+function loglikelihood(model::Model2, measurements::Measurements2)
+    ll = 0
+    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+        mx, mcx, my, mcy = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i]
+        lli = -Inf
+        @inbounds @simd ivdep for j = eachindex(model.x)
+            llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) 
+            lli = ifelse(llj > lli, llj, lli)
+        end
+        ll += lli
+    end
+    ll
+end
+function loglikelihood(model::Model1, measurements::Measurements1)
+    ll = -Inf
+    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+        mx, mcx = measurements.x[i], measurements.cx[i]
+        llj = -Inf
+        @inbounds @simd ivdep for j = eachindex(model.x)
+            llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx)
+            llj = ifelse(llj > ll, llj, ll)
+        end
+        ll += llj
     end
     ll
 end
 
-function loglikelihood(m::M, d::D) where {M<:Model, D <:DataSet}
-    @assert fieldnames(M) == fieldnames(D)
-    ll = 0.0
-    fn =  fieldnames(M)
-    @inbounds Polyester.@batch reduction=(+,ll) for i = eachindex(fn) 
-        ll += loglikelihood(getfield(m,i),getfield(d,i))
-    end
-    ll
+"""
+    IsoMix.nanll(x,D<:Union{Norm,Unconstrained})
+Same as [`loglikelihood`](@ref), but returns `0.0` instead of `NaN`.
+"""
+function nanll(x::Float64,D::Norm)
+    y = loglikelihood(x,D)
+    return ifelse(isnan(y),0.,y)
 end
-
-# 
-
+nanll(x::Float64,::Unconstrained) = 0.
