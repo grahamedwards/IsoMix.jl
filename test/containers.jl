@@ -1,10 +1,10 @@
 ## First test type structure
 
-@test Component <: IsoMixType
-@test (Component1 <: Component) & (Component2 <: Component) & (Component3 <: Component)
+@test EmDraw <: IsoMixType
+@test (EmDraw1 <: EmDraw) & (EmDraw2 <: EmDraw) & (EmDraw3 <: EmDraw)
 
-@test Data <: IsoMixType
-@test (Data1 <: Data) & (Data2 <: Data) & (Data3 <: Data)
+@test Endmember <: IsoMixType
+@test (Endmember1 <: Endmember) & (Endmember2 <: Endmember) & (Endmember3 <: Endmember)
 
 @test Measurements <: IsoMixType
 @test (Measurements1 <: Measurements) & (Measurements2 <: Measurements) & (Measurements3 <: Measurements)
@@ -23,28 +23,28 @@
 @test Prior <: IsoMixType
 @test (Prior2 <: Prior) & (Prior3 <: Prior)
 
-@test System <: IsoMixType
-@test (System2 <: System) & (System3 <: System)
+@test SysDraw <: IsoMixType
+@test (SysDraw2 <: SysDraw) & (SysDraw3 <: SysDraw)
 
 ## Test constructors 
 
-# Component
+# EmDraw
 
-@test Component(1,1) === Component1(1,1)
-@test Component(1,1,1,1) === Component2(1,1,1,1)
-@test Component(1,1,1,1,1,1) === Component3(1,1,1,1,1,1)
+@test EmDraw(1,1) === EmDraw1(1,1)
+@test EmDraw(1,1,1,1) === EmDraw2(1,1,1,1)
+@test EmDraw(1,1,1,1,1,1) === EmDraw3(1,1,1,1,1,1)
 
-@test Component(x=1,cx=1) === Component1(1,1)
-@test Component(y=1,cy=1,x=1,cx=1) === Component2(1,1,1,1)
-@test Component(x=1,y=1,z=1,cx=1,cy=1,cz=1) === Component3(1,1,1,1,1,1)
+@test EmDraw(x=1,cx=1) === EmDraw1(1,1)
+@test EmDraw(y=1,cy=1,x=1,cx=1) === EmDraw2(1,1,1,1)
+@test EmDraw(x=1,y=1,z=1,cx=1,cy=1,cz=1) === EmDraw3(1,1,1,1,1,1)
 
-@test (IsoMix.countcomponents(Component(1,1)), IsoMix.countcomponents(Component(1,1,1,1))) === (1,2)
+@test (IsoMix.countcomponents(EmDraw(1,1)), IsoMix.countcomponents(EmDraw(1,1,1,1))) === (1,2)
 
-# System
+# SysDraw
 
-@test System(Component(1,1),Component(2,2)) == System2(Component(1,1),Component(2,2))
+@test SysDraw(EmDraw(1,1),EmDraw(2,2)) == SysDraw2(EmDraw(1,1),EmDraw(2,2))
 
-@test System(Component(1,1),Component(2,2),Component(3,3)) == System3(Component(1,1),Component(2,2),Component(3,3))
+@test SysDraw(EmDraw(1,1),EmDraw(2,2),EmDraw(3,3)) == SysDraw3(EmDraw(1,1),EmDraw(2,2),EmDraw(3,3))
 
 # Datum
 
@@ -53,23 +53,23 @@ x = logNorm(1,2); @test (x.lm,x.ls) === (1.,2.)
 x = Unf(1,2); @test (x.a,x.b) === (1.,2.)
 x = Constant(1); @test x.x === 1.
 
-# Data
+# Endmember
 
-@test Data(Constant(1),Norm(1,1)) === Data1(Constant(1),Norm(1,1))
-@test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1)) === Data2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
-@test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Data3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
+@test Endmember(Constant(1),Norm(1,1)) === Endmember1(Constant(1),Norm(1,1))
+@test Endmember(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1)) === Endmember2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
+@test Endmember(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Endmember3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
 
-@test Data(x=Constant(1),cx=Norm(1,1)) === Data1(Constant(1),Norm(1,1))
-@test Data(x=Constant(1),cx=Norm(1,1),y=logNorm(1,1),cy=Unf(1,1)) === Data2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
-@test Data(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Data3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
+@test Endmember(x=Constant(1),cx=Norm(1,1)) === Endmember1(Constant(1),Norm(1,1))
+@test Endmember(x=Constant(1),cx=Norm(1,1),y=logNorm(1,1),cy=Unf(1,1)) === Endmember2(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1))
+@test Endmember(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1)) === Endmember3(Constant(1),Norm(1,1),logNorm(1,1),Unf(1,1),Unf(1,1),Unf(1,1))
 
 # Prior
 
-@test Prior(Data1(Constant(1),Norm(1,1)),Data1(Norm(1,1),Constant(1))) == Prior2(Data1(Constant(1),Norm(1,1)),Data1(Norm(1,1),Constant(1)))
+@test Prior(Endmember1(Constant(1),Norm(1,1)),Endmember1(Norm(1,1),Constant(1))) == Prior2(Endmember1(Constant(1),Norm(1,1)),Endmember1(Norm(1,1),Constant(1)))
 
-@test Prior(Data1(Constant(1),Norm(1,1)),Data(Norm(1,1),Constant(1)),Data1(Norm(1,1),Unf(0,1))) == Prior3(Data1(Constant(1),Norm(1,1)),Data1(Norm(1,1),Constant(1)),Data1(Norm(1,1),Unf(0,1)))
+@test Prior(Endmember1(Constant(1),Norm(1,1)),Endmember(Norm(1,1),Constant(1)),Endmember1(Norm(1,1),Unf(0,1))) == Prior3(Endmember1(Constant(1),Norm(1,1)),Endmember1(Norm(1,1),Constant(1)),Endmember1(Norm(1,1),Unf(0,1)))
 
-@test try Prior(Data1(Constant(1),Norm(1,1)),Data2(Norm(1,1),Constant(1), Norm(1,1),Unf(0,1))) catch e true end
+@test try Prior(Endmember1(Constant(1),Norm(1,1)),Endmember2(Norm(1,1),Constant(1), Norm(1,1),Unf(0,1))) catch e true end
 
 # Fraction 
 
@@ -97,11 +97,11 @@ testfracbool *= isapprox(testfraction.C, [1.0, 0.5, 0.0, 0.5, 0.0, 0.0])
 
 # Model
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2,))).cx) == length(Model(Fraction(2,n=3), System(Component(1,1),Component(2,2))).x) ==3 
+@test length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1),EmDraw(2,2,))).cx) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1),EmDraw(2,2))).x) ==3 
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1),Component(2,2,2,2))).cx) ==3 
+@test length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1),EmDraw(2,2,2,2))).y) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1),EmDraw(2,2,2,2))).x) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1),EmDraw(2,2,2,2))).cy) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1),EmDraw(2,2,2,2))).cx) ==3 
 
-@test length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).z) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).y) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).x) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cz) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cy) == length(Model(Fraction(2,n=3), System(Component(1,1,1,1,1,1),Component(2,2,2,2,2,2))).cx) == 3 
+@test length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).z) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).y) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).x) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).cz) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).cy) == length(Model(Fraction(2,n=3), SysDraw(EmDraw(1,1,1,1,1,1),EmDraw(2,2,2,2,2,2))).cx) == 3 
 
 # Measurements
 

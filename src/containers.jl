@@ -3,23 +3,19 @@
 
 Supertype containing all custom types and structs in the IsoMix package:
 
-Direct subtypes: [`Component`](@ref), [`Data`](@ref), [`Measurements`](@ref), [`Datum`](@ref), [`Fraction`](@ref), [`Measurements`](@ref), [`Model`](@ref),[`Prior`](@ref), [`System`](@ref) 
+Direct subtypes: [`EmDraw`](@ref), [`Endmember`](@ref), [`Measurements`](@ref), [`Datum`](@ref), [`Fraction`](@ref), [`Measurements`](@ref), [`Model`](@ref),[`Prior`](@ref), [`SysDraw`](@ref) 
 
 ---
 ```
 IsoMixType
-├─ Component
-│  ├─ Component1
-│  ├─ Component2
-│  └─ Component3
-├─ Data
-│  ├─ Data1
-│  ├─ Data2
-│  └─ Data3
-├─ DataSet
-│  ├─ DataSet1
-│  ├─ DataSet2
-│  └─ DataSet3
+├─ EmDraw
+│  ├─ EmDraw1
+│  ├─ EmDraw2
+│  └─ EmDraw3
+├─ Endmember
+│  ├─ Endmember1
+│  ├─ Endmember2
+│  └─ Endmember3
 ├─ Datum
 │  ├─ Constant
 │  ├─ Norm
@@ -36,77 +32,104 @@ IsoMixType
 ├─ Prior
 │  ├─ Prior2
 │  └─ Prior3
-└─ System
-   ├─ System2
-   └─ System3
+└─ SysDraw
+   ├─ SysDraw2
+   └─ SysDraw3
 ```
-[Generated with `using AbstractTrees,IsoMix; AbstractTrees.children(d) = subtypes(d); print_tree(IsoMixType)`]
+
+---
+Generated with 
+
+    using AbstractTrees,IsoMix; AbstractTrees.children(d) = subtypes(d); print_tree(IsoMixType)
 
 """
 abstract type IsoMixType end
 
-## Component
 
 """
-    Component <: IsoMixType
 
-Abstract supertype for `Component_` instances, where the `_` indicates dimensionality. Represents the composition of a component or endmember within a natural system. 
+    DistributionDraws <: IsoMixType
 
-see also: [`Component1`](@ref), [`Component2`](@ref), [`Component3`](@ref)
+Abstract supertype for types that contain values drawn from [`Data`](@ref) distributions of `Endmember` and `Prior` instances. `SysDraw` instances contain 2-3 `EmDraw` instances, which contain discrete draws from a corresponding `Endmember` instance.
+
+see also: [`EmDraw`](@ref), [`SysDraw`](@ref)
+
+"""
+abstract type DistributionDraws <: IsoMixType end 
+
+"""
+
+    Data <: IsoMixType
+
+Abstract supertype for types that contain measured data, represented by `Datum` instances. `Prior` instances contain 2-3 `Endmember` instances, and both `Endmember or `Measurements` instances contain `Datum` instances.
+
+see also: [`Datum`](@ref), [`Endmember`](@ref), [`Prior`](@ref), [`Measurements`](@ref)
+
+"""
+abstract type Data <: IsoMixType end
+
+## EmDraw
+
+"""
+    EmDraw <: DistributionDraws
+
+Abstract supertype for `EmDraw_` instances, where the `_` indicates dimensionality. Represents the composition of an endmember within a natural system. 
+
+see also: [`SysDraw`](@ref), [`EmDraw1`](@ref), [`EmDraw2`](@ref), [`EmDraw3`](@ref)
 
 ---
 
-`Component(x, cx)` -> `Component1`
+`EmDraw(x, cx)` -> `EmDraw1`
 
-`Component(x, cx, y, cy)` -> `Component2`
+`EmDraw(x, cx, y, cy)` -> `EmDraw2`
 
-`Component(x, cx, y, cy, z, cz)` -> `Component3`
+`EmDraw(x, cx, y, cy, z, cz)` -> `EmDraw3`
 
-The constructor function accepts values as a list of arguments or as keyword assignments, e.g.: `Component(x=1, cx=2)`
+The constructor function accepts values as a list of arguments or as keyword assignments, e.g.: `EmDraw(x=1, cx=2)`
 
 """
-abstract type Component <: IsoMixType end
-Component(x::Number, cx::Number) = Component1(x, cx)
+abstract type EmDraw <: DistributionDraws end
+EmDraw(x::Number, cx::Number) = EmDraw1(x, cx)
 
-Component(x::Number, cx::Number, y::Number, cy::Number) = Component2(x, cx, y, cy)
+EmDraw(x::Number, cx::Number, y::Number, cy::Number) = EmDraw2(x, cx, y, cy)
 
-Component(x::Number, cx::Number, y::Number, cy::Number, z::Number, cz::Number) = Component3(x, cx, y, cy, z, cz)
+EmDraw(x::Number, cx::Number, y::Number, cy::Number, z::Number, cz::Number) = EmDraw3(x, cx, y, cy, z, cz)
 
-function Component(;x::Number=NaN, cx::Number=NaN, y::Number=NaN, cy::Number=NaN, z::Number=NaN, cz::Number=NaN) 
+function EmDraw(;x::Number=NaN, cx::Number=NaN, y::Number=NaN, cy::Number=NaN, z::Number=NaN, cz::Number=NaN) 
     out = if (z == z) & (cz == cz)
-        Component3(x, cx, y, cy, z, cz)
+        EmDraw3(x, cx, y, cy, z, cz)
     elseif (y==y) & (cy==cy)
-        Component2(x, cx, y, cy)
+        EmDraw2(x, cx, y, cy)
     elseif (x==x) & (cx==cx)
-        Component1(x,cx)
+        EmDraw1(x,cx)
     else
-        error("Improper Component definition")
+        error("Improper EmDraw definition")
     end
     out
 end
 
 """
-    Component1 <: Component
+    EmDraw1 <: EmDraw
 
-1-dimensional `Component` instance.
+1-dimensional `EmDraw` instance.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
 `cx`| Concentration of x
 
-see also: [`Component`](@ref)
+see also: [`EmDraw`](@ref)
 
 """
-struct Component1 <: Component
+struct EmDraw1 <: EmDraw
     x::Float64
     cx::Float64
 end 
 
 """
-    Component2 <: Component
+    EmDraw2 <: EmDraw
 
-2-dimensional `Component` instance.
+2-dimensional `EmDraw` instance.
 
 |Fields ||
 |:--|:--|
@@ -115,10 +138,10 @@ end
 `y` | Isotopic composition of y
 `cy`| Concentration of y
 
-see also: [`Component`](@ref)
+see also: [`EmDraw`](@ref)
 
 """
-struct Component2 <: Component
+struct EmDraw2 <: EmDraw
     x::Float64
     cx::Float64
     y::Float64
@@ -126,9 +149,9 @@ struct Component2 <: Component
 end 
 
 """
-    Component3 <: Component
+    EmDraw3 <: EmDraw
 
-3-dimensional `Component` instance.
+3-dimensional `EmDraw` instance.
 
 |Fields ||
 |:--|:--|
@@ -139,10 +162,10 @@ end
 `z` | Isotopic composition of z
 `cz`| Concentration of z
 
-see also: [`Component`](@ref)
+see also: [`EmDraw`](@ref)
 
 """
-struct Component3 <: Component
+struct EmDraw3 <: EmDraw
     x::Float64
     cx::Float64
     y::Float64
@@ -155,66 +178,64 @@ end
 
 """
 
-    IsoMix.countcomponents(c::Component)
+    IsoMix.countcomponents(c::EmDraw)
 
 Count the number of elemental dimensions (1-3) of `c`.
 
 # Example
 
-    julia> IsoMix.countcomponents(Component(1,2,3,4,5,6))
+    julia> IsoMix.countcomponents(EmDraw(1,2,3,4,5,6))
     3
 
 """
-countcomponents(::C) where C <: Component = div(fieldcount(C),2)
+countcomponents(::C) where C <: EmDraw = div(fieldcount(C),2)
 
-## System
+## SysDraw
 
 """
 
-    Prior <: IsoMixType
+    SysDraw <: Data
 
-Abstract supertype for `System_` instances, where the `_` indicates dimensionality. Represents a model system composition charaterized its `Component` fields.
+Abstract supertype for `SysDraw_` instances, where the `_` indicates dimensionality. Represents a model system composition charaterized by its `EmDraw` fields.
 
-see also: [`System2`](@ref), [`System3`](@ref)
+see also: [`EmDraw`](@ref) [`SysDraw2`](@ref), [`SysDraw3`](@ref)
 
 ---
 The constructor function accepts values as a list of arguments:
 
-    System(A::Component, B::Component)
-Returns a `System2`
+    SysDraw(A::EmDraw, B::EmDraw) -> SysDraw2
 
-    System(A::Component, B::Component, C::Component)
-Returns a `System3`
+    SysDraw(A::EmDraw, B::EmDraw, C::EmDraw) -> SysDraw3
 
 ... or as keyword assignments, e.g.: 
-    System(A=..., B=...)
+    SysDraw(A=..., B=...)
 
 """
-abstract type System{T<:Component} <: IsoMixType end
-System(A::T, B::T) where T <: Component = System2(A,B)
-System(A::T, B::T, C::T) where T <: Component = System3(A,B,C)
+abstract type SysDraw{T<:EmDraw} <: DistributionDraws end
+SysDraw(A::T, B::T) where T <: EmDraw = SysDraw2(A,B)
+SysDraw(A::T, B::T, C::T) where T <: EmDraw = SysDraw3(A,B,C)
 
 """
-    System2 <: System
+    SysDraw2 <: SysDraw
 
-2-dimensional `System` instance.
+2-dimensional `SysDraw` instance.
 
 |Fields ||
 |:--|:--|
 `A` | Endmember/component A
 `B` | Endmember/component B
 
-see also: [`System`](@ref)
+see also: [`SysDraw`](@ref)
 """
-@kwdef struct System2{T<:Component} <: System{T}
+@kwdef struct SysDraw2{T<:EmDraw} <: SysDraw{T}
     A::T
     B::T
 end
 
 """
-    System3 <: System
+    SysDraw3 <: SysDraw
 
-3-dimensional `System` instance.
+3-dimensional `SysDraw` instance.
 
 |Fields ||
 |:--|:--|
@@ -222,9 +243,9 @@ end
 `B` | Endmember/component B
 `C` | Endmember/component C
 
-see also: [`System`](@ref)
+see also: [`SysDraw`](@ref)
 """
-@kwdef struct System3{T<:Component} <: System{T}
+@kwdef struct SysDraw3{T<:EmDraw} <: SysDraw{T}
     A::T
     B::T
     C::T
@@ -233,14 +254,14 @@ end
 ## Datum
 
 """
-    Datum <: IsoMixType
+    Datum <: Data
 
 Abstract supertype for `Datum` instances.
 
 see also: [`Constant`](@ref), [`Unf`](@ref), [`Norm`](@ref), [`logNorm`](@ref), [`Unconstrained`](@ref)
 
 """
-abstract type Datum <: IsoMixType end 
+abstract type Datum <: Data end 
 
 """
 
@@ -298,63 +319,63 @@ A [`Datum`](@ref) instance for an unconstrained variable, functionally similar t
 """
 struct Unconstrained <: Datum end
 
-## Data
+## Endmember
 
 """
 
-    Data <: IsoMixType
+    Endmember <: Data
 
-Abstract supertype for `Data_` instances, where the `_` indicates dimensionality.
+Abstract supertype for `Endmember_` instances, where the `_` indicates dimensionality.
 
-see also: [`Data1`](@ref), [`Data2`](@ref), [`Data3`](@ref)
+see also: [`Endmember1`](@ref), [`Endmember2`](@ref), [`Endmember3`](@ref)
 
 """
-abstract type Data <: IsoMixType end
+abstract type Endmember <: Data end
 
-Data(x::Datum, cx::Datum) = Data1(x, cx)
+Endmember(x::Datum, cx::Datum) = Endmember1(x, cx)
 
-Data(x::Datum, cx::Datum, y::Datum, cy::Datum) = Data2(x, cx, y, cy)
+Endmember(x::Datum, cx::Datum, y::Datum, cy::Datum) = Endmember2(x, cx, y, cy)
 
-Data(x::Datum, cx::Datum, y::Datum, cy::Datum, z::Datum, cz::Datum) = Data3(x, cx, y, cy, z, cz)
+Endmember(x::Datum, cx::Datum, y::Datum, cy::Datum, z::Datum, cz::Datum) = Endmember3(x, cx, y, cy, z, cz)
 
-function Data(;x::Datum=Constant(NaN), cx::Datum=Constant(NaN), y::Datum=Constant(NaN), cy::Datum=Constant(NaN), z::Datum=Constant(NaN), cz::Datum=Constant(NaN)) 
+function Endmember(;x::Datum=Constant(NaN), cx::Datum=Constant(NaN), y::Datum=Constant(NaN), cy::Datum=Constant(NaN), z::Datum=Constant(NaN), cz::Datum=Constant(NaN)) 
     
     @assert Constant(NaN) ∉ (x,cx) "Insufficient components declared."
     @assert iseven(count(x -> x==Constant(NaN),(x,y,z,cx,cy,cz))) "All components must have paired isotope composition and concentration data."
 
     out = if z == cz == y == cy == Constant(NaN)
-        Data1(x,cx)
+        Endmember1(x,cx)
     elseif z == cz == Constant(NaN)
-        Data2(x, cx, y, cy)
+        Endmember2(x, cx, y, cy)
     else
-        Data3(x, cx, y, cy, z, cz)
+        Endmember3(x, cx, y, cy, z, cz)
     end
     out
 end
 """
 
-    Data1 <: Data 
+    Endmember1 <: Endmember 
 
-1-dimensional `Data` instance.
+1-dimensional `Endmember` instance.
 
 |Fields ||
 |:--|:--|
 `x` | Isotopic composition of x
 `cx`| Concentration of x
 
-see also: [`Datum`](@ref)
+see also: [`Endmember`](@ref), [`Datum`](@ref)
 
 """
-struct Data1 <: Data
+struct Endmember1 <: Endmember
     x::Datum
     cx::Datum
 end
 
 """
 
-    Data2 <: Data 
+    Endmember2 <: Endmember 
 
-2-dimensional `Data` instance.
+2-dimensional `Endmember` instance.
 
 |Fields ||
 |:--|:--|
@@ -363,10 +384,10 @@ end
 `y` | Isotopic composition of y
 `cy`| Concentration of y
 
-see also: [`Datum`](@ref)
+see also: [`Endmember`](@ref), [`Datum`](@ref)
 
 """
-struct Data2 <: Data
+struct Endmember2 <: Endmember
     x::Datum
     cx::Datum
     y::Datum
@@ -375,9 +396,9 @@ end
 
 """
 
-    Data3 <: Data 
+    Endmember3 <: Endmember 
 
-3-dimensional `Data` instance.
+3-dimensional `Endmember` instance.
 
 |Fields ||
 |:--|:--|
@@ -388,10 +409,10 @@ end
 `z` | Isotopic composition of z
 `cz`| Concentration of z
 
-see also: [`Datum`](@ref)
+see also: [`Endmember`](@ref), [`Datum`](@ref)
 
 """
-struct Data3 <: Data
+struct Endmember3 <: Endmember
     x::Datum
     cx::Datum
     y::Datum
@@ -403,28 +424,28 @@ end
 ## Prior
 
 """
-    Prior <: IsoMixType
+    Prior <: Data
 
-Abstract supertype for `Prior_` instances, where the `_` indicates dimensionality. Represents a suite of data that provide a prior estimate for the endmember compositions of a natural system.
+Abstract supertype for `Prior_` instances, where the `_` indicates dimensionality. Represents a suite of [`Endmember`] data.
 
-see also: [`Prior2`](@ref), [`Prior3`](@ref)
+see also: [`Endmember`](@ref), [`Prior2`](@ref), [`Prior3`](@ref)
 
 ---
 
-    Prior(A::Data, B::Data)
+    Prior(A::Endmember, B::Endmember)
 
 Returns a `Prior2`
 
-    Prior(A::Data, B::Data, C::Data)
+    Prior(A::Endmember, B::Endmember, C::Endmember)
 
 Returns a `Prior3`
 
-Note: each `Data` must be of the same subtype (i.e. consistent number of components within each endmember of a system).
+Note: each `Endmember` must be of the same subtype (i.e. consistent number of components within each endmember of a system).
 
 """
-abstract type Prior{T<:Data} <: IsoMixType end
-Prior(A::T, B::T) where T<:Data = Prior2(A,B)
-Prior(A::T, B::T, C::T) where T<:Data = Prior3(A,B,C)
+abstract type Prior{T<:Endmember} <: Data end
+Prior(A::T, B::T) where T<:Endmember = Prior2(A,B)
+Prior(A::T, B::T, C::T) where T<:Endmember = Prior3(A,B,C)
 
 """
     Prior2 <: Prior
@@ -438,7 +459,7 @@ Prior(A::T, B::T, C::T) where T<:Data = Prior3(A,B,C)
 
 see also: [`Prior`](@ref)
 """
-struct Prior2{T<:Data} <: Prior{T}
+struct Prior2{T<:Endmember} <: Prior{T}
     A::T
     B::T
 end
@@ -457,7 +478,7 @@ end
 see also: [`Prior`](@ref)
 
 """
-struct Prior3{T<:Data} <: Prior{T}
+struct Prior3{T<:Endmember} <: Prior{T}
     A::T
     B::T
     C::T
@@ -603,18 +624,18 @@ see also: [`Model1`](@ref), [`Model2`](@ref), [`Model3`](@ref)
 
 ---
 
-    Model(f::Fraction, s::System)
+    Model(f::Fraction, s::SysDraw)
 
 Generate a `Model` instance 
 
 """
 abstract type Model <: IsoMixType end
 
-Model(f::Fraction,::System{Component1})= Model1(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
+Model(f::Fraction,::SysDraw{EmDraw1})= Model1(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
-Model(f::Fraction,::System{Component2}) = Model2(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
+Model(f::Fraction,::SysDraw{EmDraw2}) = Model2(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
-Model(f::Fraction,::System{Component3}) = Model3(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
+Model(f::Fraction,::SysDraw{EmDraw3}) = Model3(Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n),Vector{Float64}(undef,f.n), Vector{Float64}(undef,f.n))
 
 """
 
@@ -689,7 +710,7 @@ end
 
 """
 
-    Measurements <: IsoMixType
+    Measurements <: Data
 
 Abstract supertype for Measurements_ instances, where _ indicates dimensionality. Represents a dataset of measured (normally distributed) data as vectors of [`Norm`](@ref) instances. Absent `Measurement` fields are represented as vectors of [`Unconstrained`](@ref) and do not affect [`loglikelihood`](@ref) calculations. 
 
@@ -717,6 +738,7 @@ Note that each row among the `Measurement` fields corresponds to a specific samp
 The constructor function accepts a list of `Measurements` instances:
 
 Without concentration measurements:
+
     Measurements(x, y) -> Measurements2 
     Measurements(x, y, z) -> Measurements3
     
@@ -762,7 +784,7 @@ ERROR: AssertionError: x & y must have the same number of entries (rows). Use Na
 ```
 
 """
-abstract type Measurements <: IsoMixType end
+abstract type Measurements <: Data end
 
 function Measurements(x::Matrix, y::Matrix)
     @assert size(x,1) == size(y,1) "x & y must have the same number of entries (rows). Use NaN for missing values."

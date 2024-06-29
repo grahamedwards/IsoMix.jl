@@ -8,15 +8,15 @@ Calculate the relative¹ log-likelihood that `x` is drawn from a distribution `D
 
 ---
 
-    loglikelihood(c<:Component, d<:Data)
+    loglikelihood(c<:EmDraw, d<:Endmember)
 
 Calculate the loglikelihood that the species composition/concentrations in `c` were drawn from the corresponding distributions in `d`.
 
 ---
 
-    loglikelihood(s<:System , p<:Prior)
+    loglikelihood(s<:SysDraw , p<:Prior)
 
-Calculate the loglikelihood that the components in `s` were drawn from the corresponding `Data` in `p`.
+Calculate the loglikelihood that the components in `s` were drawn from the corresponding `Endmember` in `p`.
 
 ---
 
@@ -33,7 +33,7 @@ loglikelihood(x::Number,D::Unf) = ifelse(D.a <= x <= D.b, -log(D.b-D.a), -Inf)
 loglikelihood(x::Number,D::Constant) = ifelse(float(x)===D.x, 0., -Inf)
 loglikelihood(x::Number,::Unconstrained) = 0.
 
-function loglikelihood(c::C, d::D) where {C<:Component, D <: Data}
+function loglikelihood(c::C, d::D) where {C<:EmDraw, D <: Endmember}
     @assert fieldnames(C) == fieldnames(D)
     ll = 0.0
     @inbounds @simd ivdep for i = fieldnames(C) 
@@ -42,7 +42,7 @@ function loglikelihood(c::C, d::D) where {C<:Component, D <: Data}
     ll
 end
 
-function loglikelihood(s::S, p::P) where {S<:System, P<:Prior}
+function loglikelihood(s::S, p::P) where {S<:SysDraw, P<:Prior}
     @assert fieldnames(S) == fieldnames(P)
     ll = 0.0
     @inbounds for i = fieldnames(S)

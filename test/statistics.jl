@@ -8,17 +8,17 @@
 @test loglikelihood(1,Constant(1.2)) == -Inf
 @test iszero(loglikelihood(rand(),Unconstrained()))
 
-@test loglikelihood(Component(1,1), Data(Norm(0,1),Norm(0,1))) ≈ -1.
+@test loglikelihood(EmDraw(1,1), Endmember(Norm(0,1),Norm(0,1))) ≈ -1.
 
 @test -1.5 ≈ 
     loglikelihood(
-        System(Component(1,1), Component(3,3)),
-        Prior(Data(Norm(0,1), Norm(0,1)), Data(Norm(2,1), Unconstrained()))
+        SysDraw(EmDraw(1,1), EmDraw(3,3)),
+        Prior(Endmember(Norm(0,1), Norm(0,1)), Endmember(Norm(2,1), Unconstrained()))
 )
 
 
 
-testmodel = mix(System(Component(-3,2,-3,4), Component(3,4,3,2), Component(6,1,-6,1)),Fraction(3,n=5))
+testmodel = mix(SysDraw(EmDraw(-3,2,-3,4), EmDraw(3,4,3,2), EmDraw(6,1,-6,1)),Fraction(3,n=5))
 
 testmsmt = Measurements([-1 0.2; 3 0.2 ; 2 0.2], [2 0.1; 1 0.1; NaN NaN])
 

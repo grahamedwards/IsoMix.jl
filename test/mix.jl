@@ -1,5 +1,5 @@
 # 2-endmember, 1 species
-mtf, mts = Fraction(2,n=6), System(Component(-3,2), Component(3,4))
+mtf, mts = Fraction(2,n=6), SysDraw(EmDraw(-3,2), EmDraw(3,4))
 mtm = Model(mtf, mts)
 mix!(mtm,mts,mtf)
 
@@ -9,7 +9,7 @@ mix!(mtm,mts,mtf)
 
 
 # 2-endmember, 2 species
-mtf, mts = Fraction(2,n=6), System(Component(-3,2,-3,4), Component(3,4,3,2))
+mtf, mts = Fraction(2,n=6), SysDraw(EmDraw(-3,2,-3,4), EmDraw(3,4,3,2))
 mtm = mix(mts,mtf)
 
 @test mtm.x ≈ [3.0, 7/3, 1.5, 3/7, -1., -3.]
@@ -19,7 +19,7 @@ mtm = mix(mts,mtf)
 
 
 # 2-endmember, 3 species
-mtf, mts = Fraction(2,n=6), System(Component(-3,2,-3,4,-6,1), Component(3,4,3,2,6,2))
+mtf, mts = Fraction(2,n=6), SysDraw(EmDraw(-3,2,-3,4,-6,1), EmDraw(3,4,3,2,6,2))
 mtm = mix(mts,mtf)
 
 @test mtm.x ≈ [3.0, 7/3, 1.5, 3/7, -1., -3.]
@@ -32,7 +32,7 @@ mtm = mix(mts,mtf)
 
 
 # 3-endmember, 2 species
-mtf, mts = Fraction(3,n=5), System(Component(-3,2,-3,4), Component(3,4,3,2), Component(6,1,-6,1))
+mtf, mts = Fraction(3,n=5), SysDraw(EmDraw(-3,2,-3,4), EmDraw(3,4,3,2), EmDraw(6,1,-6,1))
 mtm = mix(mts,mtf)
 
 @test mtm.x ≈ [6.0, 4.285714285714286, 3.6, 3.230769230769231, 3.0, 2.4, 2.25, 2.1818181818181817, 2.142857142857143, 0.0, 0.6666666666666666, 1.0, -1.7142857142857142, -0.6, -3.0]
@@ -41,7 +41,7 @@ mtm = mix(mts,mtf)
 @test mtm.cy ≈ [1.0, 1.25, 1.5, 1.75, 2.0, 1.75, 2.0, 2.25, 2.5, 2.5, 2.75, 3.0, 3.25, 3.5, 4.0]
 
 # 3-endmember, 3 species
-mtf, mts = Fraction(3,n=5), System(Component(-3,2,-3,4,-6,1), Component(3,4,3,2,6,2), Component(6,1,-6,1, -2, 4))
+mtf, mts = Fraction(3,n=5), SysDraw(EmDraw(-3,2,-3,4,-6,1), EmDraw(3,4,3,2,6,2), EmDraw(6,1,-6,1, -2, 4))
 mtm = mix(mts,mtf)
 
 @test mtm.x ≈ [6.0, 4.285714285714286, 3.6, 3.230769230769231, 3.0, 2.4, 2.25, 2.1818181818181817, 2.142857142857143, 0.0, 0.6666666666666666, 1.0, -1.7142857142857142, -0.6, -3.0]
@@ -54,6 +54,6 @@ mtm = mix(mts,mtf)
 
 ## Fraction calculators 
 
-@test [fractions(System(Component(-3,2,), Component(3,4)), 7/3)...] ≈ [0.2,0.8]
+@test [fractions(SysDraw(EmDraw(-3,2,), EmDraw(3,4)), 7/3)...] ≈ [0.2,0.8]
 
-@test isapprox([fractions(System(Component(-3,2,-3,4), Component(3,4,3,2), Component(6,1,-6,1)), 3.6, 0.0)...], [0,.5,.5], atol = 1e-10)
+@test isapprox([fractions(SysDraw(EmDraw(-3,2,-3,4), EmDraw(3,4,3,2), EmDraw(6,1,-6,1)), 3.6, 0.0)...], [0,.5,.5], atol = 1e-10)
