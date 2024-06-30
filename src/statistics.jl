@@ -24,7 +24,7 @@ Calculate the loglikelihood that the components in `s` were drawn from the corre
 
 Calculate the likelihood (ℓ) that the (highest likelihood) `model` compositions were drawn from the distributions in `measurements`. Uses `Polyester.@batch`-based multithreading for faster runtimes. 
 
-Note that rather than calculating the ℓ of every model composition relative to the corresponding distribution in 'measurements`, only the highest ℓ among all instances in `model` and a given instance in `measurements` are summed. This prevents `mixtropolis` from converging on small parameter spaces that only just fit around the `measurements`.
+Note that rather than calculating the ℓ of every model composition relative to the corresponding distribution in 'measurements`, the three highest ℓ among all instances in a `model` are summed for each measurement. This prevents `mixtropolis` from converging on small parameter spaces that only just fit around the `measurements`, while also limiting aliasing problems.
 
 """
 loglikelihood(x::Number,D::Norm) = -(x-D.m)*(x-D.m)/(2*D.s*D.s)
@@ -52,15 +52,15 @@ function loglikelihood(s::S, p::P) where {S<:SysDraw, P<:Prior}
 end
 
 function loglikelihood(model::Model3, measurements::Measurements3)
-    ll = -Inf
+    ll = 0
     @inbounds Polyester.@batch for i = eachindex(measurements.x)
         mx, mcx, my, mcy, mz, mcz = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i], measurements.z[i], measurements.cz[i]
-        llj = -Inf
-        @inbounds @simd ivdep for j = eachindex(model.x)
+        ll1 = ll2 = ll3 = -Inf
+        @inbounds @simd for j = eachindex(model.x)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) + nanll(model.z[j], mz) + nanll(model.cz[j], mcz) 
-            llj = ifelse(llj > ll, llj, ll)
+            ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += llj
+        ll += (ll1 + ll2 + ll3)
     end
     ll
 end
@@ -68,28 +68,30 @@ function loglikelihood(model::Model2, measurements::Measurements2)
     ll = 0
     @inbounds Polyester.@batch for i = eachindex(measurements.x)
         mx, mcx, my, mcy = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i]
-        lli = -Inf
-        @inbounds @simd ivdep for j = eachindex(model.x)
+        ll1 = ll2 = ll3 = -Inf
+        @inbounds @simd for j = eachindex(model.x)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) 
-            lli = ifelse(llj > lli, llj, lli)
+            ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += lli
+        ll += (ll1 + ll2 + ll3)
     end
     ll
 end
 function loglikelihood(model::Model1, measurements::Measurements1)
-    ll = -Inf
+    ll = 0
     @inbounds Polyester.@batch for i = eachindex(measurements.x)
         mx, mcx = measurements.x[i], measurements.cx[i]
-        llj = -Inf
-        @inbounds @simd ivdep for j = eachindex(model.x)
+        ll1 = ll2 = ll3 = -Inf
+        @inbounds @simd for j = eachindex(model.x)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx)
-            llj = ifelse(llj > ll, llj, ll)
+            ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += llj
+        ll += (ll1 + ll2 + ll3)
     end
     ll
 end
+
+
 
 """
     IsoMix.nanll(x,D<:Union{Norm,Unconstrained})
@@ -100,3 +102,19 @@ function nanll(x::Float64,D::Norm)
     return ifelse(isnan(y),0.,y)
 end
 nanll(x::Float64,::Unconstrained) = 0.
+
+
+
+"""
+
+    IsoMix.top3(y, x1, x2, x3)
+
+Returns the three highest inputs in decreasing order, as long as `x1`, `x2`, and `x3` are provided in decreasing order. **This is optimized for speed and a very specific use case, so entering x values out of order will result in inaccurate ranking.**
+
+"""
+function top3(y::Number, x1::Number, x2::Number, x3::Number)
+    x1, x2, x3 = ifelse(y >= x1, (y, x1, x2), (x1, x2, x3))
+    x2, x3  = ifelse(x1 > y >= x2, (y, x2), (x2, x3))
+    x3 = ifelse(x2 > y > x3, y, x3)
+    return x1, x2, x3 
+end 

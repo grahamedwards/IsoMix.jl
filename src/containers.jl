@@ -538,7 +538,7 @@ end
 
 function Fraction(Amin::Number, Amax::Number; n::Int=101)
     @assert 0 ≤ Amin < Amax ≤ 1
-    
+    @assert n >= 3
     fA = collect(range(float(Amin), float(Amax), n))
     fB = 1.0 .- fA
     Fraction2(fA,fB,n)
@@ -548,7 +548,8 @@ function Fraction(Amin::Number, Amax::Number, Bmin::Number, Bmax::Number; n::Int
 
     @assert 0 ≤ Amin < Amax ≤ 1
     @assert 0 ≤ Bmin < Bmax ≤ 1
-
+    @assert n >= 3
+    
     Arange = range(float(Amin), float(Amax), n)
     Brange = range(float(Bmin), float(Bmax), n)
 
@@ -563,7 +564,7 @@ function Fraction(Amin::Number, Amax::Number, Bmin::Number, Bmax::Number; n::Int
         fCi = 1.0 - fAB 
         sumto1 = fAB <= 1.0
 
-        vi += ifelse(sumto1, 1, 0)
+        vi += sumto1 
         fA[vi] = ifelse(sumto1, fAi, fA[vi])
         fB[vi] = ifelse(sumto1, fBi, fB[vi])
         fC[vi] = ifelse(sumto1, fCi, fC[vi])
