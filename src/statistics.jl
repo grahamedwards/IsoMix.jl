@@ -36,7 +36,7 @@ loglikelihood(x::Number,::Unconstrained) = 0.
 function loglikelihood(c::C, d::D) where {C<:EmDraw, D <: Endmember}
     @assert fieldnames(C) == fieldnames(D)
     ll = 0.0
-    @inbounds @simd ivdep for i = fieldnames(C) 
+    @inbounds @simd for i = fieldnames(C) 
         ll += loglikelihood(getfield(c,i),getfield(d,i))
     end
     ll
