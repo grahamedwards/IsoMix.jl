@@ -60,7 +60,7 @@ function loglikelihood(model::Model3, measurements::Measurements3)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) + nanll(model.z[j], mz) + nanll(model.cz[j], mcz) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += (ll1 + ll2 + ll3)
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
@@ -73,7 +73,7 @@ function loglikelihood(model::Model2, measurements::Measurements2)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += (ll1 + ll2 + ll3)
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
@@ -86,7 +86,7 @@ function loglikelihood(model::Model1, measurements::Measurements1)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx)
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += (ll1 + ll2 + ll3)
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
@@ -95,13 +95,15 @@ end
 
 """
     IsoMix.nanll(x,D<:Union{Norm,Unconstrained})
+
 Same as [`loglikelihood`](@ref), but returns `0.0` instead of `NaN`.
+
 """
 function nanll(x::Float64,D::Norm)
     y = loglikelihood(x,D)
     return ifelse(isnan(y),0.,y)
 end
-nanll(x::Float64,::Unconstrained) = 0.
+nanll(x::Float64,::Unconstrained) = 1.
 
 
 
@@ -113,8 +115,8 @@ Returns the three highest inputs in decreasing order, as long as `x1`, `x2`, and
 
 """
 function top3(y::Number, x1::Number, x2::Number, x3::Number)
-    x1, x2, x3 = ifelse(y >= x1, (y, x1, x2), (x1, x2, x3))
-    x2, x3  = ifelse(x1 > y >= x2, (y, x2), (x2, x3))
-    x3 = ifelse(x2 > y > x3, y, x3)
+    x1, x2, x3 = ifelse(zero(y) > y >= x1, (y, x1, x2), (x1, x2, x3))
+    x2, x3  = ifelse(zero(y) > x1 > y >= x2, (y, x2), (x2, x3))
+    x3 = ifelse(zero(y) > x2 > y > x3, y, x3)
     return x1, x2, x3 
 end 
