@@ -60,7 +60,7 @@ function loglikelihood(model::Model3, measurements::Measurements3)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) + nanll(model.z[j], mz) + nanll(model.cz[j], mcz) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
     end
     ll
 end
@@ -73,7 +73,7 @@ function loglikelihood(model::Model2, measurements::Measurements2)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
     end
     ll
 end
@@ -86,7 +86,7 @@ function loglikelihood(model::Model1, measurements::Measurements1)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx)
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
     end
     ll
 end
@@ -103,7 +103,7 @@ function nanll(x::Float64,D::Norm)
     y = loglikelihood(x,D)
     return ifelse(isnan(y),0.,y)
 end
-nanll(x::Float64,::Unconstrained) = 1.
+nanll(x::Float64,::Unconstrained) = 0.
 
 
 
