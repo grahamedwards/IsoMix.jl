@@ -1,5 +1,7 @@
 module IsoMix
-import StaticArrays, Polyester, Random
+import StaticArrays # for fast matrix inversion with the \ operator in `fractions` function
+import Polyester
+import Random
 
 export IsoMixType, Data, DistributionDraws, Calculations
 include("containers.jl")
