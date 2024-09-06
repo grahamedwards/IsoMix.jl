@@ -35,7 +35,7 @@ loglikelihood(x::Number,::Unconstrained) = 0.
 
 function loglikelihood(c::C, d::D) where {C<:EmDraw, D <: Endmember}
     @assert fieldnames(C) == fieldnames(D)
-    ll = 0.0
+    ll = 0.
     @inbounds @simd for i = fieldnames(C) 
         ll += loglikelihood(getfield(c,i),getfield(d,i))
     end
@@ -44,7 +44,7 @@ end
 
 function loglikelihood(s::S, p::P) where {S<:SysDraw, P<:Prior}
     @assert fieldnames(S) == fieldnames(P)
-    ll = 0.0
+    ll = 0.
     @inbounds for i = fieldnames(S)
         ll += loglikelihood(getfield(s,i),getfield(p,i))
     end
@@ -52,8 +52,8 @@ function loglikelihood(s::S, p::P) where {S<:SysDraw, P<:Prior}
 end
 
 function loglikelihood(model::Model3, measurements::Measurements3)
-    ll = 0
-    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+    ll = 0.
+    @inbounds Polyester.@batch reduction=(+,ll) for i = eachindex(measurements.x)
         mx, mcx, my, mcy, mz, mcz = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i], measurements.z[i], measurements.cz[i]
         ll1 = ll2 = ll3 = -Inf
         @inbounds @simd for j = eachindex(model.x)
@@ -65,8 +65,8 @@ function loglikelihood(model::Model3, measurements::Measurements3)
     ll
 end
 function loglikelihood(model::Model2, measurements::Measurements2)
-    ll = 0
-    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+    ll = 0.
+    @inbounds Polyester.@batch reduction=(+,ll) for i = eachindex(measurements.x)
         mx, mcx, my, mcy = measurements.x[i], measurements.cx[i], measurements.y[i], measurements.cy[i]
         ll1 = ll2 = ll3 = -Inf
         @inbounds @simd for j = eachindex(model.x)
@@ -78,8 +78,8 @@ function loglikelihood(model::Model2, measurements::Measurements2)
     ll
 end
 function loglikelihood(model::Model1, measurements::Measurements1)
-    ll = 0
-    @inbounds Polyester.@batch for i = eachindex(measurements.x)
+    ll = 0.
+    @inbounds Polyester.@batch reduction=(+,ll) for i = eachindex(measurements.x)
         mx, mcx = measurements.x[i], measurements.cx[i]
         ll1 = ll2 = ll3 = -Inf
         @inbounds @simd for j = eachindex(model.x)
@@ -96,7 +96,7 @@ end
 """
     IsoMix.nanll(x,D<:Union{Norm,Unconstrained})
 
-Same as [`loglikelihood`](@ref), but returns `0.0` instead of `NaN`.
+Same as [`loglikelihood`](@ref), but returns `0.0` instead of `NaN`. Returns `1` for `Unconstrained` priors.
 
 """
 function nanll(x::Float64,D::Norm)
