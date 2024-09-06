@@ -24,7 +24,7 @@ Calculate the loglikelihood that the components in `s` were drawn from the corre
 
 Calculate the likelihood (ℓ) that the (highest likelihood) `model` compositions were drawn from the distributions in `measurements`. Uses `Polyester.@batch`-based multithreading for faster runtimes. 
 
-Note that rather than calculating the ℓ of every model composition relative to the corresponding distribution in 'measurements`, the three highest ℓ among all instances in a `model` are summed for each measurement. This prevents `mixtropolis` from converging on small parameter spaces that only just fit around the `measurements`, while also limiting aliasing problems.
+Note that rather than calculating the ℓ of every model composition relative to the corresponding distribution in 'measurements`, the mean of the three highest ℓ among all instances in a `model` are summed among measurements. This prevents `mixtropolis` from converging on small parameter spaces that only just fit around the `measurements`, while also limiting aliasing problems.
 
 """
 loglikelihood(x::Number,D::Norm) = -(x-D.m)*(x-D.m)/(2*D.s*D.s)
@@ -60,7 +60,7 @@ function loglikelihood(model::Model3, measurements::Measurements3)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) + nanll(model.z[j], mz) + nanll(model.cz[j], mcz) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
@@ -73,7 +73,7 @@ function loglikelihood(model::Model2, measurements::Measurements2)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx) + nanll(model.y[j], my) + nanll(model.cy[j], mcy) 
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
@@ -86,7 +86,7 @@ function loglikelihood(model::Model1, measurements::Measurements1)
             llj = nanll(model.x[j], mx) + nanll(model.cx[j], mcx)
             ll1, ll2, ll3 = top3(llj, ll1, ll2, ll3)
         end
-        ll += log(exp(ll1) + exp(ll2) + exp(ll3)) - 1.0986122886681098 # log(3) = 1.0986122886681098
+        ll += log(exp(ll1) + exp(ll2) + exp(ll3))
     end
     ll
 end
