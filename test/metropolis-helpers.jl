@@ -11,7 +11,7 @@ testprior = Prior(Endmember(Norm(0,1),logNorm(2,1)), Endmember(Unf(2,6), Constan
 ## jump
 testjump = IsoMix.jump(SysDraw(EmDraw(1,2),EmDraw(3,4)), SysDraw(EmDraw(.1,.5),EmDraw(.2,.4)), rng=StableRNG(1))
 @test (testjump[1].A.x == 1.) & (testjump[1].A.cx == 2.) & (testjump[1].B.x != 3.)  & (testjump[1].B.cx == 4.)
-@test testjump[2] == (:B, :x, 0.14332564801086908)
+@test testjump[2] == (:B, :x, 0.1505773044249047)
 
 
 ## update

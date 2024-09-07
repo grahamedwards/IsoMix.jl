@@ -69,8 +69,8 @@ Given a guess of `SysDraw` values `s` and corresponding jumping distribution sca
 """
 function jump(p::S, j::S ; rng=Random.Xoshiro()) where {C<:EmDraw, S<:SysDraw{C}}
     si, ci = rand(rng,fieldnames(S)), rand(rng,fieldnames(C))
-    j = getfield(getfield(j,si),ci)*rand(rng)
-    update(p, si, ci, getfield(getfield(p,si),ci) + j), (si, ci, j)
+    j = getfield(getfield(j,si),ci)*randn(rng)
+    update(p, si, ci, getfield(getfield(p,si),ci) + j), (si, ci, abs(j))
 end
 
 
