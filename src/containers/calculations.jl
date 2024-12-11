@@ -376,7 +376,7 @@ Chains(n::Int,p::Prior3) =  Chain3( EmChains(n, p.A), EmChains(n, p.A), EmChains
 see also: [`Chains`](@ref)
 
 """
-struct Chains2{T<:EmChains} <: Chains
+struct Chains2{T<:EmChains} <: Chains{T}
     A::T
     B::T
     ll::Vector{Float64}
@@ -397,7 +397,7 @@ end
 see also: [`Chains`](@ref)
 
 """
-struct Chains3{T<:EmChains} <: Chains
+struct Chains3{T<:EmChains} <: Chains{T}
     A::T
     B::T
     C::T
