@@ -221,3 +221,187 @@ struct Model3 <: Model
     z::Vector{Float64}
     cz::Vector{Float64}
 end
+
+## Chains
+
+"""
+
+    EmChains <: Calculations
+
+Short for `EndmemberChains`. Abstract supertype for `EmC_` instances, where the `_` indicates dimensionality. Represents a Markov chain posterior for the constituent compositions of an endmember within a natural system. 
+
+see also: [`Chains`](@ref), [`EmC1`](@ref), [`EmC2`](@ref), [`EmC3`](@ref)
+
+### Construction
+
+    EmChains(n, <:Endmember)
+    
+To construct, seed with a number of chain iterations `n` and an `Endmember` instance to seed dimensionality, e.g.
+
+`EmChains(n,::Endmember2)` -> `EmC2`
+
+"""
+abstract type EmChains <: Calculations end
+
+EmChains(n::Int,::Endmember1) = EmC1(Vector{Float64}(undef,n),Vector{Float64}(undef,n))
+
+EmChains(n::Int,::Endmember2) = EmC2(Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n))
+
+EmChains(n::Int,::Endmember3) =  EmC3(Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n), Vector{Float64}(undef,n))
+
+"""
+
+    EmC1 <: EmChains 
+
+1-dimensional `EmChains` instance.
+
+|Fields ||
+|:--|:--|
+`x` | Markov chain of isotopic compositions of x
+`cx`| Markov chain of concentrations of x
+
+see also: [`EmChains`](@ref), [`Chains`](@ref), [`Endmember`](@ref)
+
+"""
+struct EmC1 <: EmChains
+    x::Vector{Float64}
+    cx::Vector{Float64}
+end
+
+"""
+
+    EmC2 <: EmChains 
+
+2-dimensional `EmChains` instance.
+
+|Fields ||
+|:--|:--|
+`x` | Markov chain of isotopic compositions of x
+`cx`| Markov chain of concentrations of x
+`y` | Markov chain of isotopic compositions of y
+`cy`| Markov chain of concentrations of y
+
+see also: [`EmChains`](@ref), [`Chains`](@ref), [`Endmember`](@ref)
+
+"""
+struct EmC2 <: EmChains
+    x::Vector{Float64}
+    cx::Vector{Float64}
+    y::Vector{Float64}
+    cy::Vector{Float64}
+end
+
+"""
+
+    EmC3 <: EmChains 
+
+3-dimensional `EmChains` instance.
+
+|Fields ||
+|:--|:--|
+`x` | Markov chain of isotopic compositions of x
+`cx`| Markov chain of concentrations of x
+`y` | Markov chain of isotopic compositions of y
+`cy`| Markov chain of concentrations of y
+`z` | Markov chain of isotopic compositions of z
+`cz`| Markov chain of concentrations of z
+
+see also: [`EmChains`](@ref), [`Chains`](@ref), [`Endmember`](@ref)
+
+"""
+struct EmC3 <: EmChains
+    x::Vector{Float64}
+    cx::Vector{Float64}
+    y::Vector{Float64}
+    cy::Vector{Float64}
+    z::Vector{Float64}
+    cz::Vector{Float64}
+end
+
+
+
+"""
+
+
+
+
+
+---
+
+    Prior(A<:EmChains, B::Endmember)
+
+Returns a `Prior2`
+
+    Prior(A::Endmember, B::Endmember, C::Endmember)
+
+Returns a `Prior3`
+
+Note: each `Endmember` must be of the same subtype (i.e. consistent number of components within each endmember of a system).
+
+"""
+
+"""
+
+    Chains <: Calculations
+
+Abstract supertype for `Chains_` instances, where the `_` indicates dimensionality. Represents a suite of EndmemberChains ([`EmChains`](@ref)). 
+
+see also: [`EmChains`](@ref), [`Chains2`](@ref), [`Chains3`](@ref), [`Prior`](@ref)
+
+### Construction
+
+    Chains(n, <:Prior)
+    
+To construct, seed with a number of chain iterations `n` and a Prior instance to seed dimensionality, e.g.
+
+`Chains(n,::Prior2{Endmember3})` -> `Chains2{EmC3}`
+
+"""
+abstract type Chains{T<:EmChains} <: Calculations end
+
+Chains(n::Int,p::Prior2) =  Chain2( EmChains(n, p.A), EmChains(n, p.A), Vector{Float64}(undef,n), BitVector(undef,n) )
+
+Chains(n::Int,p::Prior3) =  Chain3( EmChains(n, p.A), EmChains(n, p.A), EmChains(n, p.A), Vector{Float64}(undef,n), BitVector(undef,n) )
+
+"""
+    Chains2 <: Prior
+
+2-dimensional `Chains` instance.
+
+|Fields ||
+|:--|:--|
+`A` | Markov chains of endmember/component A
+`B` | Markov chains of endmember/component B
+
+see also: [`Chains`](@ref)
+
+"""
+struct Chains2{T<:EmChains} <: Chains
+    A::T
+    B::T
+    ll::Vector{Float64}
+    accept::BitVector
+end
+
+"""
+    Chains3 <: Prior
+
+3-dimensional `Chains` instance.
+
+|Fields ||
+|:--|:--|
+`A` | Markov chains of endmember/component A
+`B` | Markov chains of endmember/component B
+`C` | Markov chains of endmember/component C
+
+see also: [`Chains`](@ref)
+
+"""
+struct Chains3{T<:EmChains} <: Chains
+    A::T
+    B::T
+    C::T
+    ll::Vector{Float64}
+    accept::BitVector
+end
+

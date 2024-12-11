@@ -12,7 +12,7 @@ Isotopic mixing models coupled to statistical tools.
 
 ## Type structure in `IsoMix.jl`
 
-Isotopic mixing models entail a number of different parameters. `IsoMix.jl` relies Julia's custom type system to 
+Isotopic mixing models entail a number of different parameters. `IsoMix.jl` relies Julia's custom type system to provide a coherent structure for these parameters.
 
 To accommodate the flexible dimensionality of the package, specific instances of a given type typically have a trailing number indicates the number of dimensions (e.g. `Data` and `Data2`).
 
@@ -31,7 +31,7 @@ Measurement and model values have corresponding uncertainties, so each `Datum` i
 `Norm` | Normal
 `logNorm` | Lognormal
 `Constant` | A single, discrete value (point)
-`Unconstrained` | An (inadvisable) unconstrained distribution
+`Unconstrained` | Unconstrained parameter space (⚠️not advised⚠️) 
 |||
 
 
@@ -66,3 +66,6 @@ Frational mixtures are used to calculate `Model` compositions.
 #### `Model`
 A `Model` instance contains simulated isotopic compositions and concentrations of a species that correspond to the mixtures in a `Fraction` instance: `Model1`, `Model2`, `Model3`. 
 
+
+---
+![GPL3](https://www.gnu.org/graphics/gplv3-127x51.png)
